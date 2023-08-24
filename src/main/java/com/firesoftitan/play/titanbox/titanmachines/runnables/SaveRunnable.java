@@ -1,0 +1,22 @@
+package com.firesoftitan.play.titanbox.titanmachines.runnables;
+
+import com.firesoftitan.play.titanbox.libs.runnables.TitanSaverRunnable;
+import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
+import com.firesoftitan.play.titanbox.titanmachines.managers.*;
+
+public class SaveRunnable extends TitanSaverRunnable {
+    public SaveRunnable() {
+        super(TitanMachines.instants);
+    }
+    @Override
+    public void run() {
+        AreaHopperManager.save();
+        ChunkHopperManager.save();
+        ItemSorterManager.instance.save();
+        PipesManager.instance.save();
+        BlockBreakerManager.instance.save();
+        LumberjackManager.instance.save();
+        TrashBarrelManager.instance.save();
+    }
+}

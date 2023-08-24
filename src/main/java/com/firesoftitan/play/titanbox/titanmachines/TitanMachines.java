@@ -1,0 +1,309 @@
+package com.firesoftitan.play.titanbox.titanmachines;
+
+import com.firesoftitan.play.titanbox.libs.tools.*;
+import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
+import com.firesoftitan.play.titanbox.titanmachines.listeners.TabCompleteListener;
+import com.firesoftitan.play.titanbox.titanmachines.loaders.ConfigLoader;
+import com.firesoftitan.play.titanbox.titanmachines.managers.*;
+import com.firesoftitan.play.titanbox.titanmachines.runnables.*;
+import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
+import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
+import com.firesoftitan.play.titanbox.titanmachines.support.WildStackerSupport;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
+public final class TitanMachines extends JavaPlugin {
+
+    public static MainListener mainListener;
+    public static Tools tools;
+    public static LibsHologramTool hologramTool;
+    public static TitanMachines instants;
+    public static ConfigLoader configLoader;
+    public static  LibsNBTTool nbtTool;
+    public static  LibsItemStackTool itemStackTool;
+    public static LibsMessageTool messageTool;
+    public static LibsLocationTool locationTool;
+    public static LibsFormattingTool formattingTool;
+    public static LibsSerializeTool serializeTool;
+    public static VisualRunnable visualTask;
+    public static boolean pipedEnabled = true;
+    public static boolean sorterEnabled = true;
+    public static boolean hopperEnabled = true;
+    @Override
+    public void onEnable() {
+        // Plugin startup logic
+        instants = this;
+        tools = new Tools(this, new SaveRunnable(), -1);
+        nbtTool = tools.getNBTTool();
+        locationTool = tools.getLocationTool();
+        itemStackTool = tools.getItemStackTool();
+        messageTool = tools.getMessageTool();
+        hologramTool = tools.getHologramTool();
+        formattingTool = tools.getFormattingTool();
+        serializeTool = tools.getSerializeTool();
+        new SensibleToolboxSupport();
+        new SlimefunSupport();
+        new WildStackerSupport();
+
+        mainListener = new MainListener(this);
+        mainListener.registerEvents();
+        configLoader = new ConfigLoader();
+
+        visualTask = new VisualRunnable();
+        visualTask.runTaskTimer(this, 10, 10);
+        new BlockBreakerManager();
+        new LumberjackManager();
+        new ItemSorterManager();
+        new PipesManager();
+        new TrashBarrelManager();
+        new RecipeManager();
+
+        new LumberjackRunnable().runTaskTimer(this, 20, 20);
+        new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
+        new HopperRunnable().runTaskTimer(this, 20, 20);
+        new SorterRunnable().runTaskTimer(this, 20, 20);
+        new PipeRunnable().runTaskTimer(this, 5, 5);
+        new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
+
+        Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
+        Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
+
+    }
+
+    @Override
+    public void onDisable() {
+        visualTask.removeAll();
+    }
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, String label, String[] args) {
+        if (isAdmin(sender)) {
+            if (label.equalsIgnoreCase("titanmachines") || label.equalsIgnoreCase("tm")) {
+                if (args.length > 0) {
+                    String name = args[0];
+                    if (name.equalsIgnoreCase("toggle"))
+                    {
+                        if (args.length > 1) {
+                            String type = args[1];
+                            if (type.equalsIgnoreCase("pipes") || type.equalsIgnoreCase("pipe")) {
+                                pipedEnabled = !pipedEnabled;
+                                if (pipedEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Pipes are now Enabled");
+                                if (!pipedEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Pipes are now Disabled");
+                                return true;
+                            }
+                            if (type.equalsIgnoreCase("sorters") || type.equalsIgnoreCase("sorter")) {
+                                sorterEnabled = !sorterEnabled;
+                                if (sorterEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Sorters are now Enabled");
+                                if (!sorterEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Sorters are now Disabled");
+                                return true;
+                            }
+                            if (type.equalsIgnoreCase("hoppers") || type.equalsIgnoreCase("hopper")) {
+                                hopperEnabled = !hopperEnabled;
+                                if (hopperEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Hoppers are now Enabled");
+                                if (!hopperEnabled)
+                                    messageTool.sendMessagePlayer((Player) sender, "Hoppers are now Disabled");
+                                return true;
+                            }
+                        }
+
+                    }
+                    if (name.equalsIgnoreCase("give"))
+                    {
+                        int amount = 1;
+                        if (args.length > 3)
+                        {
+                            amount = Integer.parseInt(args[3]);
+                        }
+                        if (args[2].equals("breaker")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getBlockBreaker();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("trash")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+
+                                ItemStack itemStack = getTrashBarrel();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("lumberjack")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getLumberjack();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("pipe")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getPipe();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("sorter")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getItemSorter();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("chunkhopper")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getChunkHopper();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("areahopper")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getAreaHopper();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                    }
+                }
+            }
+            if (sender instanceof Player)
+            {
+                Player player = (Player) sender;
+                messageTool.sendMessagePlayer(player, "/tm reload - Reloads config files");
+                messageTool.sendMessagePlayer(player, "/tm give <name> <pipe/sorter/hopper> #");
+                messageTool.sendMessagePlayer(player, "/tm toggle <pipe/sorter/hopper>");
+            }
+            else
+            {
+                messageTool.sendMessageSystem("/tm reload - Reloads config files");
+                messageTool.sendMessageSystem("/tm give <name> <pipe/sorter/chunkhopper/ect> #");
+                messageTool.sendMessageSystem( "/tm toggle <pipe/sorter/hopper>");
+            }
+
+        }
+        return true;
+    }
+    public ItemStack getPipe() {
+        return getPipe(30030);
+    }
+    public ItemStack getPipe(int modelNumber) {
+        ItemStack itemStack = new ItemStack(Material.BLACKSTONE);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Pipe");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Send items threw the pipe");
+        itemStack = nbtTool.set(itemStack, "pipe", true);
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        itemMeta.setCustomModelData(modelNumber);
+        itemStack.setItemMeta(itemMeta);
+
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getItemSorter() {
+        ItemStack itemStack = new ItemStack(Material.HOPPER);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Item Sorter");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Sends items to chests,",
+                ChatColor.AQUA + "based on what is already in them.",
+                ChatColor.YELLOW + "Place item in chest, then Shift Right-Click with empty hand, to add chest.",
+                ChatColor.DARK_RED + "Shift Right-Click chest with empty hand for more options.",
+                ChatColor.GRAY + "*All rejected items go to the chest attached to the hopper.",
+                ChatColor.GRAY + "*Only 1 item can be assigned to each chest.",
+                ChatColor.GRAY + "*Supports: Chest, Trap Chest, Barrels, BigStorageUnits, HyperStorageUnits");
+        itemStack = nbtTool.set(itemStack, "itemsorter", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "ITEM_SORTER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getTrashBarrel() {
+        ItemStack itemStack = new ItemStack(Material.BARREL);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Trash Barrel");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Removes all blocks in its inventory.");
+        itemStack = nbtTool.set(itemStack, "trashbarrel", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "TRASH_BARREL");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getLumberjack() {
+        ItemStack itemStack = new ItemStack(Material.DISPENSER);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Lumberjack");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Cuts down trees when they grow, up to 8 blocks tall");
+        itemStack = nbtTool.set(itemStack, "lumberjack", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "LUMBERJACK");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getBlockBreaker() {
+        ItemStack itemStack = new ItemStack(Material.DISPENSER);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Block Breaker");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Breaks Blocks in front of it.");
+        itemStack = nbtTool.set(itemStack, "blockbreaker", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "BLOCK_BREAKER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getChunkHopper() {
+        ItemStack itemStack = new ItemStack(Material.HOPPER);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Chunk Hopper");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Sucks dropped items from the chunk its placed in.");
+        itemStack = nbtTool.set(itemStack, "chunkhopper", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "CHUNK_HOPPER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getAreaHopper() {
+        ItemStack itemStack = new ItemStack(Material.HOPPER);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Area Hopper");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Sucks dropped items from 5 blocks away.");
+        itemStack = nbtTool.set(itemStack, "areahopper", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "AREA_HOPPER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+
+    public static boolean isAdmin(CommandSender sender)
+    {
+        if (sender.isOp() || sender.hasPermission("titanbox.admin")) return true;
+        return false;
+    }
+}
