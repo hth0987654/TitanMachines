@@ -2,18 +2,15 @@ package com.firesoftitan.play.titanbox.titanmachines.managers;
 
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class LumberjackManager {
-    private SaveManager lumberjack = new SaveManager(TitanMachines.instants.getName(), "lumberjack");
+    private final SaveManager lumberjack = new SaveManager(TitanMachines.instants.getName(), "lumberjack");
     public static LumberjackManager instance;
 
     public LumberjackManager() {
@@ -35,13 +32,10 @@ public class LumberjackManager {
     public List<String> getKeys()
     {
         Set<String> keys = this.lumberjack.getKeys();
-        List<String> outKeys = new ArrayList<>();
-        outKeys.addAll(keys);
-        return outKeys;
+        return new ArrayList<String>(keys);
     }
     public void remove(Location location)
     {
-        Block block = location.getBlock();
         String key = getKey(location);
         this.lumberjack.delete(key);
 
@@ -79,8 +73,7 @@ public class LumberjackManager {
     {
         String key = getKey(location);
         String string = this.lumberjack.getString(key + ".sapling.material");
-        Material material = Material.getMaterial(string);
-        return material;
+        return Material.getMaterial(string);
     }
     public int getSaplingCount(Location location)
     {
@@ -124,8 +117,7 @@ public class LumberjackManager {
     }
     public String getKey(Location location)
     {
-        String serializeLocation = TitanMachines.tools.getSerializeTool().serializeLocation(location);
-        return serializeLocation;
+        return TitanMachines.tools.getSerializeTool().serializeLocation(location);
     }
     public Boolean isLumberjack(Location location)
     {

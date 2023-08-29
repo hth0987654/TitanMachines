@@ -24,11 +24,11 @@ public class LumberjackRunnable extends BukkitRunnable {
     @Override
     public void run() {
         LumberjackManager manager = LumberjackManager.instance;
-        if (quList.size() == 0) quList = manager.getKeys();
+        if (quList.isEmpty()) quList = manager.getKeys();
         List<String> runningKeys = new ArrayList<String>();
         for(int i = 0;i<10; i++)
         {
-            if (quList.size() > 0) {
+            if (!quList.isEmpty()) {
                 runningKeys.add(quList.get(0));
                 quList.remove(0);
             }
@@ -45,7 +45,7 @@ public class LumberjackRunnable extends BukkitRunnable {
                         Block base = block.getRelative(facing);
                         if (isBlockBreakable(base)) {
                             World world = base.getWorld();
-                            for (int y = 0; y < 9; y++) {
+                            for (int y = 0; y < 12; y++) {
                                 for (int x = -3; x < 4; x++) {
                                     for (int z = -3; z < 4; z++) {
                                         Block relative = block.getRelative(x, y, z);
@@ -71,6 +71,9 @@ public class LumberjackRunnable extends BukkitRunnable {
                                 }
                             }
                             world.playSound(base.getLocation(), Sound.BLOCK_WOOD_BREAK, 1, 1);
+                        }
+                        if (base.getType() == Material.AIR || base.getType() == Material.CAVE_AIR || base.getType() == Material.VOID_AIR)
+                        {
                             if (saplingCount > 0)
                             {
                                 base.setType(saplingMaterial);

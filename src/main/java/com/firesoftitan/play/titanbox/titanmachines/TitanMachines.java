@@ -74,6 +74,7 @@ public final class TitanMachines extends JavaPlugin {
         new SorterRunnable().runTaskTimer(this, 20, 20);
         new PipeRunnable().runTaskTimer(this, 5, 5);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
+        new JunctionBoxRunnable().runTaskTimer(this,5, 5);
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
         Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
@@ -235,6 +236,7 @@ public final class TitanMachines extends JavaPlugin {
         itemStack = nbtTool.set(itemStack, "pipe", true);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setCustomModelData(modelNumber);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "PIPE");
         itemStack.setItemMeta(itemMeta);
 
         itemStack.setAmount(1);
@@ -252,6 +254,14 @@ public final class TitanMachines extends JavaPlugin {
                 ChatColor.GRAY + "*Supports: Chest, Trap Chest, Barrels, BigStorageUnits, HyperStorageUnits");
         itemStack = nbtTool.set(itemStack, "itemsorter", true);
         itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "ITEM_SORTER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getJunctionBox() {
+        ItemStack itemStack = new ItemStack(Material.WAXED_COPPER_BLOCK);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Junction Box");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Connect pipes for advanced sorting");
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "JUNCTION_BOX");
         itemStack.setAmount(1);
         return itemStack;
     }

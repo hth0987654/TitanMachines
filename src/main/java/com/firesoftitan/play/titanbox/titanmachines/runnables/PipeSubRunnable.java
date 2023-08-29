@@ -1,8 +1,10 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
+import com.firesoftitan.play.titanbox.titanmachines.managers.JunctionBoxManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -71,7 +73,7 @@ public class PipeSubRunnable extends BukkitRunnable {
 
 
             if (overFlow != null) {
-                if (!ContainerManager.hasAvailableSlot(chestOut)) { //if chest is full then move to overflow
+                if (!ContainerManager.hasAvailableSlot(uuid, chestOut)) { //if chest is full then move to overflow
                     overflow = true;
                 }
                 if (overflow)
@@ -109,27 +111,27 @@ public class PipeSubRunnable extends BukkitRunnable {
     }
     private void scanChest(UUID group, int slot, Location chestOut, Location chestIn, PipeChestFilterType chestInFilterType, ItemStack chestInFilterItem)
     {
-        for(int i: ContainerManager.getInventorySlots(chestOut))
+        for(int i: ContainerManager.getInventorySlots(uuid, chestOut))
         {
             PipeChestFilterType OutChestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(chestOut, group, i);
             if (OutChestSettingsFilterType == PipeChestFilterType.ALL) {
-                ItemStack item = ContainerManager.getInventorySlot(chestOut, i);
+                ItemStack item = ContainerManager.getInventorySlot(uuid, chestOut, i);
 
                 if (!TitanMachines.itemStackTool.isEmpty(item)) {
 
                     if (chestInFilterType == PipeChestFilterType.ALL) {
                         item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(chestOut, item, i);
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
                         return;
                     } else if (chestInFilterType == PipeChestFilterType.MATERIAL_ONLY &&
                             item.getType() == chestInFilterItem.getType()) {
                         item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(chestOut, item, i);
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
                         return;
                     } else if (chestInFilterType == PipeChestFilterType.TOTAL_MATCH &&
                             TitanMachines.itemStackTool.isItemEqual(item, chestInFilterItem)) {
                         item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(chestOut, item, i);
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
                         return;
                     }
 
@@ -146,13 +148,14 @@ public class PipeSubRunnable extends BukkitRunnable {
 
     private ItemStack placeInChestFixed(Location chest, ItemStack itemStack, int slot)
     {
-
+        Location pipe = JunctionBoxBlock.getPipeLocation(uuid, chest);
         if (ContainerManager.isContainer(chest)) {
-            ItemStack item = ContainerManager.getInventorySlot(chest, slot);
+            ItemStack item = ContainerManager.getInventorySlot(pipe, chest, slot);
             if (TitanMachines.itemStackTool.isEmpty(item)) {
-                ContainerManager.setInventorySlot(chest, itemStack, slot);
+                ContainerManager.setInventorySlot(pipe, chest, itemStack, slot);
                 return null;
             } else if (TitanMachines.itemStackTool.isItemEqual(itemStack, item)) {
+                //noinspection DataFlowIssue
                 int amount = item.getAmount();
                 int max = item.getMaxStackSize();
                 int needed = max - amount;
@@ -161,11 +164,11 @@ public class PipeSubRunnable extends BukkitRunnable {
                 if (have > needed) {
                     itemStack.setAmount(have - needed);
                     item.setAmount(max);
-                    ContainerManager.setInventorySlot(chest, item, slot);
+                    ContainerManager.setInventorySlot(pipe, chest, item, slot);
                     return itemStack.clone();
                 }
                 item.setAmount(amount + have);
-                ContainerManager.setInventorySlot(chest, item, slot);
+                ContainerManager.setInventorySlot(pipe, chest, item, slot);
                 return null;
             }
         }

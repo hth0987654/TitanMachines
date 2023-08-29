@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.libs.tools.LibsItemStackTool;
 import com.firesoftitan.play.titanbox.libs.tools.LibsNBTTool;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.guis.AdvancedPipeGUI;
+import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.SorterGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.*;
@@ -198,6 +199,9 @@ public class MainListener implements Listener {
 
                         AdvancedPipeGUI.onClickButtonEvent((Player) whoClicked, button, location, connection, group, slot);
                     }
+                    else {
+                        AdvancedPipeGUI.setTypeSelect((Player) whoClicked, clicked);
+                    }
                 }
             }
         }
@@ -233,8 +237,26 @@ public class MainListener implements Listener {
                         Location location = TitanMachines.nbtTool.getLocation(clicked, "location");
                         Location sorting = TitanMachines.nbtTool.getLocation(clicked, "sorting");
                         Block block = location.getBlock();
-                        BlockState state = block.getState();
                         SorterGUI.onClickButtonEvent((Player) whoClicked, button, location, sorting);
+                    }
+                }
+            }
+        }
+        if (openInventory.getTitle().equals(JunctionBoxGUI.name))
+        {
+            event.setCancelled(true);
+            if (event.getSlot() > -1 && event.getSlot() < clickedInventory.getSize()) {
+                ItemStack clicked = clickedInventory.getItem(event.getSlot());
+                if (!TitanMachines.itemStackTool.isEmpty(clicked)) {
+                    if (TitanMachines.nbtTool.containsKey(clicked, "button")) {
+                        Integer button = TitanMachines.nbtTool.getInteger(clicked, "button");
+                        Location location = TitanMachines.nbtTool.getLocation(clicked, "location");
+                        Location sorting = TitanMachines.nbtTool.getLocation(clicked, "sorting");
+                        BlockFace currentFace = BlockFace.valueOf(TitanMachines.nbtTool.getString(clicked, "current_face"));
+                        JunctionBoxGUI.onClickButtonEvent((Player) whoClicked, button, location, sorting, currentFace);
+                    }
+                    else {
+                        JunctionBoxGUI.setTypeSelect((Player) whoClicked, clicked);
                     }
                 }
             }

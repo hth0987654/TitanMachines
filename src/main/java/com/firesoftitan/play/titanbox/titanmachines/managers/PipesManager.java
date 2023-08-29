@@ -514,16 +514,16 @@ public class PipesManager {
     private void addChestConnection(Location pipe, Location chest)
     {
         UUID group = getGroup(pipe);
-        addChestConnection(chest, group);
+        addChestConnection(pipe, chest, group);
     }
-    private void addChestConnection(Location chest, UUID group)
+    private void addChestConnection(Location from, Location chest, UUID group)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("groups." + group + ".chest." + key + ".location", chest);
         for(int i = 0; i < 7; i++) {
             if (!pipes.contains("chest." + key + ".groups." + i )) {
                 pipes.set("chest." + key + ".groups." + i + ".id", group);
-                for (int slot: ContainerManager.getInventorySlots(chest))
+                for (int slot: ContainerManager.getInventorySlots(from, chest))
                 {
                         if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot))
                             setChestSettingsFilterType(chest, group, slot, PipeChestFilterType.ALL);

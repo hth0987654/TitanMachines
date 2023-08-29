@@ -21,9 +21,12 @@ public class AreaHopperManager {
         for(String key: keys)
         {
             Location locationA = getLocation(key);
-            if (locationA != null && locationA.getWorld() != null && locationA.getWorld().getName().equals(locationA.getWorld().getName()) &&  locationA.distance(location) < 7)
-            {
-                return getKey(locationA.clone());
+            if (locationA != null && locationA.getWorld() != null) {
+                if (locationA.getWorld().getName().equals(locationA.getWorld().getName())) {
+                    if (locationA.distance(location) < 7) {
+                        return getKey(locationA.clone());
+                    }
+                }
             }
         }
         return null;
