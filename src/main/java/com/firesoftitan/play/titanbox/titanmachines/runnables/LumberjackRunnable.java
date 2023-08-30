@@ -1,7 +1,11 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
+import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
 import com.firesoftitan.play.titanbox.titanmachines.managers.BlockBreakerManager;
+import com.firesoftitan.play.titanbox.titanmachines.managers.LumberManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.LumberjackManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,16 +20,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class LumberjackRunnable extends BukkitRunnable {
 
-    private List<String> quList = new ArrayList<String>();
+    private final List<Location> quList = new ArrayList<Location>();
 
     @Override
     public void run() {
-        LumberjackManager manager = LumberjackManager.instance;
-        if (quList.isEmpty()) quList = manager.getKeys();
-        List<String> runningKeys = new ArrayList<String>();
+        LumberManager manager = LumberManager.instance;
+        if (quList.isEmpty()) {
+            Set<Location> locations = LumberManager.instance.getLocations();
+            quList.addAll(locations);
+        }
+        List<Location> runningKeys = new ArrayList<Location>();
         for(int i = 0;i<10; i++)
         {
             if (!quList.isEmpty()) {
@@ -33,12 +41,16 @@ public class LumberjackRunnable extends BukkitRunnable {
                 quList.remove(0);
             }
         }
-        for(String key: runningKeys) {
-            if (manager.isPowered(key)) {
-                Location location = manager.getLocation(key);
+        if (runningKeys.isEmpty()) return;
+        for(Location location: runningKeys) {
+            TitanBlock titanBlock = manager.getTitanBlock(location);
+            if (titanBlock == null) continue;
+            LumberjackBlock lumberjackBlock = LumberjackBlock.convert(titanBlock);
+            if (lumberjackBlock == null) continue;
+            if (lumberjackBlock.isPowered()) {
                 if (location.getChunk().isLoaded()) {
-                    Material saplingMaterial = manager.getSaplingMaterial(location);
-                    int saplingCount = manager.getSaplingCount(location);
+                    Material saplingMaterial = lumberjackBlock.getSaplingMaterial();
+                    int saplingCount = lumberjackBlock.getSaplingCount();
                     Block block = location.getBlock();
                     if (block.getBlockData() instanceof  Directional) {
                         BlockFace facing = ((Directional) block.getBlockData()).getFacing();
@@ -51,34 +63,35 @@ public class LumberjackRunnable extends BukkitRunnable {
                                         Block relative = block.getRelative(x, y, z);
                                         if (isBlockBreakable(relative)) {
                                             Collection<ItemStack> drops = relative.getDrops();
-                                            relative.setType(Material.AIR);
+                                            if (y == 0)
+                                            {
+                                                if (saplingCount > 0) {
+                                                    relative.setType(saplingMaterial);
+                                                    lumberjackBlock.removeSapling(saplingMaterial);
+                                                }
+                                                else relative.setType(Material.AIR);
+                                            }
+                                            else relative.setType(Material.AIR);
                                             for (ItemStack itemStack : drops) {
                                                 boolean dropsap = true;
                                                 if (itemStack.getType().name().contains("SAPLING"))
                                                 {
                                                     if (saplingMaterial == null || (itemStack.getType() == saplingMaterial && saplingCount < 9) || itemStack.getType() != saplingMaterial)
                                                     {
-                                                        manager.addSapling(location, itemStack.getType());
-                                                        saplingMaterial = manager.getSaplingMaterial(location);
-                                                        saplingCount = manager.getSaplingCount(location);
+                                                        lumberjackBlock.addSapling( itemStack.getType());
+                                                        saplingMaterial = lumberjackBlock.getSaplingMaterial();
+                                                        saplingCount = lumberjackBlock.getSaplingCount();
                                                         dropsap = false;
                                                     }
                                                 }
                                                 if (dropsap) world.dropItem(relative.getLocation().clone().add(0.5f, 1, 0.5f), itemStack);
                                             }
+
                                         }
                                     }
                                 }
                             }
                             world.playSound(base.getLocation(), Sound.BLOCK_WOOD_BREAK, 1, 1);
-                        }
-                        if (base.getType() == Material.AIR || base.getType() == Material.CAVE_AIR || base.getType() == Material.VOID_AIR)
-                        {
-                            if (saplingCount > 0)
-                            {
-                                base.setType(saplingMaterial);
-                                manager.removeSapling(location, saplingMaterial);
-                            }
                         }
                     }
                 }

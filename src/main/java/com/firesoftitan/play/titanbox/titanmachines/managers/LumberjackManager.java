@@ -1,7 +1,9 @@
 package com.firesoftitan.play.titanbox.titanmachines.managers;
 
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
+import com.firesoftitan.play.titanbox.libs.managers.SettingsManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -16,6 +18,29 @@ public class LumberjackManager {
     public LumberjackManager() {
 
         LumberjackManager.instance = this;
+        List<String> blocks = new ArrayList<String>();
+        for(String key: getKeys())
+        {
+            Location hoppersLocation = this.lumberjack.getLocation(key + ".location");
+            String mat = this.lumberjack.getString(key + ".sapling.material");
+            int amount = this.lumberjack.getInt(key + ".sapling.count");
+            Boolean power = this.lumberjack.getBoolean(key + ".power");
+
+            SaveManager saveManager = new SaveManager();
+            saveManager.set("location", hoppersLocation);
+            saveManager.set("material", mat);
+            saveManager.set("count", amount);
+            saveManager.set("power", power);
+            saveManager.set("itemStack", TitanMachines.instants.getLumberjack());
+            saveManager.set("titanID", LumberjackBlock.titanID);
+            LumberjackBlock lumberjackBlock = new LumberjackBlock(saveManager);
+            LumberManager.instance.setTitanBlock(hoppersLocation, lumberjackBlock);
+            blocks.add(key);
+        }
+        for(String key: blocks) {
+            lumberjack.delete(key);
+        }
+        lumberjack.save();
     }
     public void save()
     {

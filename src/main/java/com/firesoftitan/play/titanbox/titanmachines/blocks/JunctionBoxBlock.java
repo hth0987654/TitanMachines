@@ -71,7 +71,7 @@ public class JunctionBoxBlock extends TitanBlock {
         String name = TitanMachines.itemStackTool.getName(itemStack);
         String yamlValid = name.replaceAll("[^a-zA-Z0-9_.-]", "");
         saveManager.set(blockFace.name() + ".filter.type." + yamlValid, pipe.getValue());
-        TitanBlock.UpdateBlock(this);
+        TitanBlock.updateBlock(this);
     }
     public void setFilterList(BlockFace blockFace, List<ItemStack> filter)
     {
@@ -92,7 +92,7 @@ public class JunctionBoxBlock extends TitanBlock {
         List<ItemStack> filteredItems = new ArrayList<>(filter);
 
         saveManager.set(blockFace.name() + ".filter.items", filteredItems);
-        TitanBlock.UpdateBlock(this);
+        TitanBlock.updateBlock(this);
     }
 
     public Inventory getInventory(BlockFace blockFace)
@@ -108,7 +108,7 @@ public class JunctionBoxBlock extends TitanBlock {
         List<ItemStack> saves = new ArrayList<ItemStack>(Arrays.asList(inventory.getContents()));
         if (saves.get(0) == null) saves.set(0, new ItemStack(Material.AIR));
         saveManager.set(blockFace.name() + ".inventory", saves);
-        TitanBlock.UpdateBlock(this);
+        TitanBlock.updateBlock(this);
     }
     public BlockFace getNoFilter()
     {
@@ -123,7 +123,7 @@ public class JunctionBoxBlock extends TitanBlock {
             saveManager.set(face.name() + ".default", false);
         }
         saveManager.set(blockFace.name() + ".default", true);
-        TitanBlock.UpdateBlock(this);
+        TitanBlock.updateBlock(this);
     }
     public BlockFace getOverflow()
     {
@@ -138,7 +138,7 @@ public class JunctionBoxBlock extends TitanBlock {
             saveManager.set(face.name() + ".overflow", false);
         }
         saveManager.set(blockFace.name() + ".overflow", true);
-        TitanBlock.UpdateBlock(this);
+        TitanBlock.updateBlock(this);
     }
     public static Location getPipeLocation(UUID uuid, Location box)
     {

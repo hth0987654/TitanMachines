@@ -316,7 +316,7 @@ public class MainListener implements Listener {
                 BlockBreakerManager.instance.setPower(clickedBlock.getLocation(), !powered);
                 if (powered) TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.RED + "OFF");else TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.GREEN + "ON");
             }
-            if (LumberjackManager.instance.isLumberjack(clickedBlock.getLocation()))
+/*            if (LumberjackManager.instance.isLumberjack(clickedBlock.getLocation()))
             {
                 event.setCancelled(true);
                 boolean powered = LumberjackManager.instance.isPowered(clickedBlock.getLocation());
@@ -326,7 +326,7 @@ public class MainListener implements Listener {
                 if (powered) TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has been turned " + ChatColor.RED + "OFF");else TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has been turned " + ChatColor.GREEN + "ON");
                 if (saplingMaterial != null)TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has: " + ChatColor.AQUA + TitanMachines.tools.getFormattingTool().fixCapitalization(saplingMaterial.name()) + ChatColor.WHITE + " " +  ChatColor.GREEN + saplingCount + ChatColor.WHITE + "/" +  ChatColor.GREEN + "8" );
 
-            }
+            }*/
         }
 
         if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && !player.isSneaking()) {
@@ -413,13 +413,13 @@ public class MainListener implements Listener {
             event.setDropItems(false);
             if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
         }
-        if (LumberjackManager.instance.isLumberjack(clone))
+/*        if (LumberjackManager.instance.isLumberjack(clone))
         {
             LumberjackManager.instance.remove(clone);
             ItemStack itemSorter = TitanMachines.instants.getLumberjack();
             event.setDropItems(false);
             if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
-        }
+        }*/
         if (BlockBreakerManager.instance.isBreaker(clone))
         {
             BlockBreakerManager.instance.remove(clone);
@@ -549,12 +549,12 @@ public class MainListener implements Listener {
             TrashBarrelManager.instance.add(clone);
             TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Trash Barrel ready to remove blocks from the game :)");
         }
-        if (nbtTool.getBoolean(itemInHand, "lumberjack") )
+/*        if (nbtTool.getBoolean(itemInHand, "lumberjack") )
         {
             Location clone = location.clone();
             LumberjackManager.instance.add(clone);
             TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Lumberjack read to cut down some trees :)");
-        }
+        }*/
         if (nbtTool.getBoolean(itemInHand, "blockbreaker") )
         {
             Location clone = location.clone();

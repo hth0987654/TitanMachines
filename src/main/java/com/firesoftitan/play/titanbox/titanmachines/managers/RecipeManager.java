@@ -125,7 +125,7 @@ public class RecipeManager {
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
 
         ItemStack partItem = TitanMachines.instants.getLumberjack();
-        tools.getRecipeTool().addAdvancedRecipe(partItem, matrix);
+        new LumberManager(TitanMachines.instants, partItem, matrix);
     }
     private void addTrash() {
 

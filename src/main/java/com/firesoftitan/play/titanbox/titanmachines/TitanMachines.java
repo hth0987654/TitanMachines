@@ -61,12 +61,13 @@ public final class TitanMachines extends JavaPlugin {
 
         visualTask = new VisualRunnable();
         visualTask.runTaskTimer(this, 10, 10);
+        new RecipeManager();
         new BlockBreakerManager();
         new LumberjackManager();
         new ItemSorterManager();
         new PipesManager();
         new TrashBarrelManager();
-        new RecipeManager();
+
 
         new LumberjackRunnable().runTaskTimer(this, 20, 20);
         new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
@@ -277,7 +278,12 @@ public final class TitanMachines extends JavaPlugin {
     public ItemStack getLumberjack() {
         ItemStack itemStack = new ItemStack(Material.DISPENSER);
         itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Lumberjack");
-        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Cuts down trees when they grow, up to 8 blocks tall");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Cuts down single tree when they grow, up to 11 blocks tall"
+                , ChatColor.GRAY + "Right click for info"
+                , ChatColor.GRAY + "Hold shift and right click to turn on/off"
+                , ChatColor.GRAY + "Plant sapling directly in front of face and make sure machine is on"
+                , ChatColor.GRAY + "Machine will auto gather saplings, but you can hold a sapling in hand and right click to add more");
+
         itemStack = nbtTool.set(itemStack, "lumberjack", true);
         itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "LUMBERJACK");
         itemStack.setAmount(1);
