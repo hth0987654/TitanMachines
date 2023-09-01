@@ -7,7 +7,6 @@ import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
@@ -21,7 +20,7 @@ import java.util.UUID;
 public class ContainerManager {
     public static boolean isContainer(Location location)
     {
-        if (JunctionBoxManager.instance.isTitanBlock(location)) return true;
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location)) return true;
         if (location.getBlock().getState() instanceof Container) return true;
         if (SensibleToolboxSupport.instance.isSupported(location)) return true;
         return SlimefunSupport.instance.isSupported(location);
@@ -33,18 +32,19 @@ public class ContainerManager {
     }
     public static ItemStack addToInventory(Location from, Location location, ItemStack itemStack)
     {
-        if (JunctionBoxManager.instance.isTitanBlock(location))
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             BlockFace face = location.getBlock().getFace(from.getBlock());
-            Inventory inventory = junctionBoxBlock.getInventory(face);
-            HashMap<Integer, ItemStack> integerItemStackHashMap = inventory.addItem(itemStack.clone());
-            for(ItemStack itemStack1: integerItemStackHashMap.values())
-            {
-                if (!TitanMachines.itemStackTool.isEmpty(itemStack1)) return itemStack1.clone();
+            if (junctionBoxBlock != null && face != null) {
+                Inventory inventory = junctionBoxBlock.getInventory(face);
+                HashMap<Integer, ItemStack> integerItemStackHashMap = inventory.addItem(itemStack.clone());
+                for (ItemStack itemStack1 : integerItemStackHashMap.values()) {
+                    if (!TitanMachines.itemStackTool.isEmpty(itemStack1)) return itemStack1.clone();
+                }
+                junctionBoxBlock.setInventory(face, inventory);
             }
-            junctionBoxBlock.setInventory(face, inventory);
             return null;
         }
         if (TitanMachines.itemStackTool.isEmpty(itemStack)) return null;
@@ -102,12 +102,15 @@ public class ContainerManager {
     }
     public static boolean hasAvailableSlot(Location from, Location location)
     {
-        if (JunctionBoxManager.instance.isTitanBlock(location))
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-            Inventory inventory = junctionBoxBlock.getInventory(location.getBlock().getFace(from.getBlock()));
-            return inventory.firstEmpty() > -1;
+            BlockFace face = location.getBlock().getFace(from.getBlock());
+            if (junctionBoxBlock != null && face != null) {
+                Inventory inventory = junctionBoxBlock.getInventory(face);
+                return inventory.firstEmpty() > -1;
+            }
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
         {
@@ -133,14 +136,16 @@ public class ContainerManager {
     }
     public static void setInventorySlot(Location from, Location location, ItemStack itemStack, int slot)
     {
-        if (JunctionBoxManager.instance.isTitanBlock(location))
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             BlockFace face = location.getBlock().getFace(from.getBlock());
-            Inventory inventory = junctionBoxBlock.getInventory(face);
-            inventory.setItem(slot,itemStack);
-            junctionBoxBlock.setInventory(face, inventory);
+            if (junctionBoxBlock != null && face != null) {
+                Inventory inventory = junctionBoxBlock.getInventory(face);
+                inventory.setItem(slot, itemStack);
+                junctionBoxBlock.setInventory(face, inventory);
+            }
             return;
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
@@ -166,13 +171,15 @@ public class ContainerManager {
     }
     public static ItemStack getInventorySlot(Location from, Location location, int slot)
     {
-        if (JunctionBoxManager.instance.isTitanBlock(location))
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             BlockFace face = location.getBlock().getFace(from.getBlock());
-            Inventory inventory = junctionBoxBlock.getInventory(face);
-            return inventory.getItem(slot);
+            if (junctionBoxBlock != null && face != null) {
+                Inventory inventory = junctionBoxBlock.getInventory(face);
+                return inventory.getItem(slot);
+            }
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
         {
@@ -196,16 +203,20 @@ public class ContainerManager {
     public static Set<Integer> getInventorySlots(Location pipe, Location chest)
     {
         Set<Integer> out = new HashSet<Integer>();
-        if (JunctionBoxManager.instance.isTitanBlock(chest))
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, chest))
         {
             if (pipe == null) return out;
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(chest);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, chest);
             if (titanBlock.getTitanID().equals(JunctionBoxBlock.titanID)) {
                 JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-                BlockFace face = chest.getBlock().getFace(pipe.getBlock());
-                Inventory inventory = junctionBoxBlock.getInventory(face);
-                for (int i = 0; i < inventory.getSize(); i++) {
-                    out.add(i);
+                if (junctionBoxBlock != null) {
+                    BlockFace face = chest.getBlock().getFace(pipe.getBlock());
+                    if (face != null) {
+                        Inventory inventory = junctionBoxBlock.getInventory(face);
+                        for (int i = 0; i < inventory.getSize(); i++) {
+                            out.add(i);
+                        }
+                    }
                 }
                 return out;
             }

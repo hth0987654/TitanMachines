@@ -1,8 +1,10 @@
 package com.firesoftitan.play.titanbox.titanmachines;
 
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TabCompleteListener;
+import com.firesoftitan.play.titanbox.titanmachines.listeners.TitanBlockListener;
 import com.firesoftitan.play.titanbox.titanmachines.loaders.ConfigLoader;
 import com.firesoftitan.play.titanbox.titanmachines.managers.*;
 import com.firesoftitan.play.titanbox.titanmachines.runnables.*;
@@ -58,12 +60,12 @@ public final class TitanMachines extends JavaPlugin {
         mainListener = new MainListener(this);
         mainListener.registerEvents();
         configLoader = new ConfigLoader();
+        TitanBlockManager.registerListener(this, new TitanBlockListener());
 
         visualTask = new VisualRunnable();
         visualTask.runTaskTimer(this, 10, 10);
         new RecipeManager();
         new BlockBreakerManager();
-        new LumberjackManager();
         new ItemSorterManager();
         new PipesManager();
         new TrashBarrelManager();

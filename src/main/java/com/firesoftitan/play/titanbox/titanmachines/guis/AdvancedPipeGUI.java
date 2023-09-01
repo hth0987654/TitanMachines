@@ -1,17 +1,18 @@
 package com.firesoftitan.play.titanbox.titanmachines.guis;
 
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
-import com.firesoftitan.play.titanbox.titanmachines.managers.JunctionBoxManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
@@ -109,22 +110,24 @@ public class AdvancedPipeGUI {
                 this.inventory.setItem(slot, item.clone());
             }
         }
-        else if (state instanceof Container || JunctionBoxManager.instance.isTitanBlock(chest))
+        else if (state instanceof Container || TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, chest))
         {
             Inventory containerInventory;
             int defaultSize = 9;
-            if (JunctionBoxManager.instance.isTitanBlock(chest))
+            if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, chest))
             {
-                TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(chest);
+                TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, chest);
                 if (titanBlock != null && titanBlock.getTitanID().equals(JunctionBoxBlock.titanID)) {
                     JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-                    containerInventory = junctionBoxBlock.getInventory(chest.getBlock().getFace(location.getBlock()));
+                    BlockFace face = chest.getBlock().getFace(location.getBlock());
+                    if (junctionBoxBlock == null || face == null) return false;
+                    containerInventory = junctionBoxBlock.getInventory(face);
                     defaultSize = containerInventory.getSize();
                 }else return false;
-            }else {
-                Container container  = (Container) (state);
+            }else if (state instanceof  Container container){
                 containerInventory = container.getInventory();
             }
+            else return false;
             if (containerInventory.getSize() > 26) {
                 this.inventory = Bukkit.createInventory(null, containerInventory.getSize(), AdvancedPipeGUI.name);
             }

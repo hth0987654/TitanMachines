@@ -17,7 +17,6 @@ public class SaveRunnable extends TitanSaverRunnable {
         ItemSorterManager.instance.save();
         PipesManager.instance.save();
         BlockBreakerManager.instance.save();
-        LumberjackManager.instance.save();
         TrashBarrelManager.instance.save();
     }
 }

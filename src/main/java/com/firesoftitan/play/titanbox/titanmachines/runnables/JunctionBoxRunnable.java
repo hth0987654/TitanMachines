@@ -1,9 +1,9 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
-import com.firesoftitan.play.titanbox.titanmachines.managers.JunctionBoxManager;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.Inventory;
@@ -20,15 +20,14 @@ public class JunctionBoxRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        JunctionBoxManager junctionBoxManager = JunctionBoxManager.instance;
         if (quList.isEmpty())
         {
-            Set<Location> locations = junctionBoxManager.getLocations();
+            Set<Location> locations = TitanBlockManager.getLocations(JunctionBoxBlock.titanID);
             quList.addAll(locations);
             return;
         }
 
-        TitanBlock titanBlock = junctionBoxManager.getTitanBlock(quList.get(0));
+        TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, quList.get(0));
         if (titanBlock == null)
         {
             quList.remove(0);

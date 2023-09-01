@@ -2,7 +2,6 @@ package com.firesoftitan.play.titanbox.titanmachines.managers;
 
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -10,11 +9,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.EulerAngle;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ContainerVisualManager {
     private static final HashMap<String, List<ContainerVisualManager>> listVisualHashMap = new HashMap<String, List<ContainerVisualManager>>();
@@ -67,8 +67,8 @@ public class ContainerVisualManager {
         visualManagers.add(this);
         listVisualHashMap.put(key, visualManagers);
 
-        String keyuu = TitanMachines.tools.getSerializeTool().serializeLocation(container);
-        uuidVisualHashMap.put(keyuu, this);
+        String keyU = TitanMachines.tools.getSerializeTool().serializeLocation(container);
+        uuidVisualHashMap.put(keyU, this);
     }
     public void remove()
     {
@@ -88,28 +88,51 @@ public class ContainerVisualManager {
     }
     public void rescan() {
         Location clone = container.clone();
-        Location check = container.clone().add(blockFace.getModX() * 1, blockFace.getModY() * 1, blockFace.getModZ() * 1);
-        float x = blockFace.getModX() * 0.75f + 1;
-        float y = blockFace.getModY() * 0.5f - 0.25f;
-        float z = blockFace.getModZ() * 0.75f ;
-        Location fixContainerLocationA = ItemSorterManager.getFixContainerLocation(check);
-        Location fixContainerLocationB = ItemSorterManager.getFixContainerLocation(clone);
-        if (fixContainerLocationA != null && fixContainerLocationB != null && TitanMachines.locationTool.isLocationsEqual(fixContainerLocationA, fixContainerLocationB))
+        Location check = container.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
+        Location fixedCheck = ItemSorterManager.getFixContainerLocation(check);
+        Location fixedClone = ItemSorterManager.getFixContainerLocation(clone);
+        if (TitanMachines.locationTool.isLocationsEqual(fixedCheck, fixedClone))
         {
-            x = blockFace.getModX() * 1.75f + 1;
-            y = blockFace.getModY() * 0.5f - 0.25f;
-            z = blockFace.getModZ() * 1.75f ;
+            blockFace = BlockFace.NORTH;
         }
-        Location add = clone.add(x, y, z);
+
+        float yaw = yawAngleMap.get(blockFace);
+        Location displayLoc = getOffset(blockFace, clone);
         if (hologramManager == null) {
-            hologramManager = TitanMachines.hologramTool.addHologram(add.clone().add(0,200, 0));
+            hologramManager = TitanMachines.hologramTool.addHologram(displayLoc.clone().add(0,200, 0));
         }
-        hologramManager.setLocation(add);
+        if (blockFace != BlockFace.DOWN && blockFace != BlockFace.UP) hologramManager.getArmorStand().setRightArmPose(new EulerAngle(Math.PI/2, 0, Math.PI));
+
+        else hologramManager.getArmorStand().setRightArmPose(new EulerAngle(0, 0, 0));
+        hologramManager.setLocation(displayLoc);
+        hologramManager.getArmorStand().setRotation(yaw, 0);
         hologramManager.setEquipment(EquipmentSlot.HAND, this.itemStack);
         //if (this.itemStack.hasItemMeta() && this.itemStack.getItemMeta().hasDisplayName()) hologramManager.setText(this.itemStack.getItemMeta().getDisplayName());
 
     }
+    private Location getOffset(BlockFace blockFace, Location location)
+    {
+        Location offsetLocation = location.clone();
 
+        return switch (blockFace) {
+            case NORTH -> offsetLocation.add(0.7f, -1.15f, 0.4f);//Move Left, Right is X, Forward, Back is Z
+            case SOUTH -> offsetLocation.add(0.25f, -1.15f, 0.6f);//Move Left, Right is X, Forward, Back is Z
+            case EAST -> offsetLocation.add(0.6f, -1.15f, 0.7f);//Move Left, Right is Z, Forward, Back is X
+            case WEST -> offsetLocation.add(0.4f, -1.15f, 0.25f);//Move Left, Right is Z, Forward, Back is X
+            case UP -> offsetLocation.add(0.85f, 0.4f, 0.25f);
+            case DOWN -> offsetLocation.add(0.85f, -0.95f, 0.25f);
+            default -> offsetLocation;
+        };
+    }
+
+    private final Map<BlockFace, Float> yawAngleMap = Map.of(
+            BlockFace.NORTH, 0f,
+            BlockFace.SOUTH, 180f,
+            BlockFace.EAST, 90f,
+            BlockFace.WEST, -90f,
+            BlockFace.UP, 0f,
+            BlockFace.DOWN, 0f
+    );
     public ItemStack getItemStack() {
         return itemStack;
     }

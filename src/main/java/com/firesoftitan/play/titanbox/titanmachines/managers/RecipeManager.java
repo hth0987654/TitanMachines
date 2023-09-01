@@ -1,5 +1,6 @@
 package com.firesoftitan.play.titanbox.titanmachines.managers;
 
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +33,7 @@ public class RecipeManager {
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
         ItemStack partItem = TitanMachines.instants.getJunctionBox();
         partItem.setAmount(1);
-        new JunctionBoxManager(TitanMachines.instants, partItem, matrix);
+        TitanBlockManager.registerTitanBlock(TitanMachines.instants, partItem, matrix);
     }
     private void addPipes() {
         ItemStack[] matrix = new ItemStack[9];
@@ -125,7 +126,7 @@ public class RecipeManager {
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
 
         ItemStack partItem = TitanMachines.instants.getLumberjack();
-        new LumberManager(TitanMachines.instants, partItem, matrix);
+        TitanBlockManager.registerTitanBlock(TitanMachines.instants, partItem, matrix);
     }
     private void addTrash() {
 

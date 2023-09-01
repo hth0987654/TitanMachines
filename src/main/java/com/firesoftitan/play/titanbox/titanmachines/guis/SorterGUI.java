@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerVisualManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
+import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -139,17 +140,36 @@ public class SorterGUI {
                 break;
 
             case 10:
-                Inventory inventory = ((Container) state).getInventory();
-                if (ItemSorterManager.instance.hasSorter(player)) {
-                    if (ItemSorterManager.isSortingContainer(location)) {
-                        BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, location);
-                        ItemStack added = ItemSorterManager.instance.addChest(player, location, inventory);
-                        ItemSorterManager.instance.setSettingsSortingFacing(player, location, settingsSortingFacing);
-                        if (!TitanMachines.itemStackTool.isEmpty(added)) {
-                            String name = TitanMachines.itemStackTool.getName(added);
-                            TitanMachines.messageTool.sendMessagePlayer(player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
-                            SorterGUI sorterGUI = new SorterGUI(player, location);
-                            sorterGUI.open();
+                if (state instanceof Container container)
+                {
+                    Inventory inventory = container.getInventory();
+                    if (ItemSorterManager.instance.hasSorter(player)) {
+                        if (ItemSorterManager.isSortingContainer(location)) {
+                            BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, location);
+                            ItemStack added = ItemSorterManager.instance.addChest(player, location, inventory);
+                            ItemSorterManager.instance.setSettingsSortingFacing(player, location, settingsSortingFacing);
+                            if (!TitanMachines.itemStackTool.isEmpty(added)) {
+                                String name = TitanMachines.itemStackTool.getName(added);
+                                TitanMachines.messageTool.sendMessagePlayer(player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
+                                SorterGUI sorterGUI = new SorterGUI(player, location);
+                                sorterGUI.open();
+                            }
+                        }
+                    }
+                }
+                else {
+                    if (ItemSorterManager.instance.hasSorter(player)) {
+                        if (ItemSorterManager.isSortingContainer(location)) {
+                            BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, location);
+                            ItemStack added = ItemSorterManager.instance.addChest(player, location, SensibleToolboxSupport.instance.getOutputItem(location));
+                            ItemSorterManager.instance.setSettingsSortingFacing(player, location, settingsSortingFacing);
+                            ItemSorterManager.instance.setSettingsSortingLock(player, location);
+                            if (!TitanMachines.itemStackTool.isEmpty(added)) {
+                                String name = TitanMachines.itemStackTool.getName(added);
+                                TitanMachines.messageTool.sendMessagePlayer(player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
+                                SorterGUI sorterGUI = new SorterGUI(player, location);
+                                sorterGUI.open();
+                            }
                         }
                     }
 

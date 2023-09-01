@@ -1,11 +1,11 @@
 package com.firesoftitan.play.titanbox.titanmachines.guis;
 
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
-import com.firesoftitan.play.titanbox.titanmachines.managers.JunctionBoxManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -57,7 +57,7 @@ public class JunctionBoxGUI {
         {
             this.inventory.setItem(i, borderItem.clone());
         }
-        TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(this.location);
+        TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, this.location);
         JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
         if (junctionBoxBlock == null) return;
         updateInventoryWindow();
@@ -161,7 +161,7 @@ public class JunctionBoxGUI {
 
     @NotNull
     private void updateInventoryWindow() {
-        TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(this.location);
+        TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, this.location);
         JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
         Inventory inventory1 = junctionBoxBlock.getInventory(currentFace);
         for (int i = 0; i < inventory1.getSize(); i++)
@@ -188,7 +188,7 @@ public class JunctionBoxGUI {
     {
         if (select.containsKey(player.getUniqueId())) {
             SelectorGUI s = select.get(player.getUniqueId());
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(s.getLocation());
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, s.getLocation());
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             List<ItemStack> filterList = junctionBoxBlock.getFilterList(s.getBlockFace());
             filterList.add(item.clone());
@@ -233,7 +233,7 @@ public class JunctionBoxGUI {
         if (button >= 36 && button < 36 + JunctionBoxBlock.blockFaces.length)
         {
             BlockFace blockFace1 = JunctionBoxBlock.blockFaces[button - 36];
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock convert = JunctionBoxBlock.convert(titanBlock);
             convert.setNoFilter(blockFace1);
 
@@ -244,7 +244,7 @@ public class JunctionBoxGUI {
         if (button >= 45 && button < 45 + JunctionBoxBlock.blockFaces.length)
         {
             BlockFace blockFace1 = JunctionBoxBlock.blockFaces[button - 45];
-            TitanBlock titanBlock = JunctionBoxManager.instance.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock convert = JunctionBoxBlock.convert(titanBlock);
             convert.setOverflow(blockFace1);
 

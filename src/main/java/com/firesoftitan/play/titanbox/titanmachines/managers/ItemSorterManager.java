@@ -76,7 +76,7 @@ public class ItemSorterManager {
     public static Location getFixContainerLocation(Location location)
     {
         if (location.getBlock().getState() instanceof Container sortedChest) {
-            return sortedChest.getInventory().getLocation().clone();
+            if (sortedChest.getInventory().getLocation() != null) return sortedChest.getInventory().getLocation().clone();
         }
         return location.clone();
     }

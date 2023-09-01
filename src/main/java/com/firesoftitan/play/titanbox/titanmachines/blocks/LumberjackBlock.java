@@ -2,14 +2,9 @@ package com.firesoftitan.play.titanbox.titanmachines.blocks;
 
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
-import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class LumberjackBlock  extends TitanBlock {
     public static final String titanID = "LUMBERJACK";
@@ -37,7 +32,16 @@ public class LumberjackBlock  extends TitanBlock {
         updateBlock(this);
 
     }
-    public boolean removeSapling(Material material)
+    public void clearSapling(Material material)
+    {
+        if (this.saveManager.contains("sapling.material"))
+        {
+            this.saveManager.set("sapling.material", material.name());
+            this.saveManager.set("sapling.count", 0);
+            updateBlock(this);
+        }
+    }
+    public void removeSapling(Material material)
     {
         int amount = 0;
         if (this.saveManager.contains("sapling.material"))
@@ -49,11 +53,9 @@ public class LumberjackBlock  extends TitanBlock {
                     this.saveManager.set("sapling.material", material.name());
                     this.saveManager.set("sapling.count", amount - 1);
                     updateBlock(this);
-                    return true;
                 }
             }
         }
-        return false;
     }
     public Material getSaplingMaterial()
     {

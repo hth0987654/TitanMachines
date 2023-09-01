@@ -1,12 +1,9 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
-import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
-import com.firesoftitan.play.titanbox.titanmachines.managers.BlockBreakerManager;
-import com.firesoftitan.play.titanbox.titanmachines.managers.LumberManager;
-import com.firesoftitan.play.titanbox.titanmachines.managers.LumberjackManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -28,9 +25,8 @@ public class LumberjackRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        LumberManager manager = LumberManager.instance;
         if (quList.isEmpty()) {
-            Set<Location> locations = LumberManager.instance.getLocations();
+            Set<Location> locations = TitanBlockManager.getLocations(LumberjackBlock.titanID);
             quList.addAll(locations);
         }
         List<Location> runningKeys = new ArrayList<Location>();
@@ -43,7 +39,7 @@ public class LumberjackRunnable extends BukkitRunnable {
         }
         if (runningKeys.isEmpty()) return;
         for(Location location: runningKeys) {
-            TitanBlock titanBlock = manager.getTitanBlock(location);
+            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(LumberjackBlock.titanID, location);
             if (titanBlock == null) continue;
             LumberjackBlock lumberjackBlock = LumberjackBlock.convert(titanBlock);
             if (lumberjackBlock == null) continue;
@@ -55,12 +51,15 @@ public class LumberjackRunnable extends BukkitRunnable {
                     if (block.getBlockData() instanceof  Directional) {
                         BlockFace facing = ((Directional) block.getBlockData()).getFacing();
                         Block base = block.getRelative(facing);
+                        if (base.getType().name().contains("SAPLING") && lumberjackBlock.getSaplingMaterial() != base.getType()) lumberjackBlock.clearSapling(base.getType());
                         if (isBlockBreakable(base)) {
                             World world = base.getWorld();
-                            for (int y = 0; y < 12; y++) {
-                                for (int x = -3; x < 4; x++) {
-                                    for (int z = -3; z < 4; z++) {
+                            int cap = 1;
+                            for (int y = 0; y < cap; y++) {
+                                for (int x = -4; x < 5; x++) {
+                                    for (int z = -4; z < 5; z++) {
                                         Block relative = block.getRelative(x, y, z);
+                                        if (isBlockBreakable(block.getRelative(x, y + 1, z)) && cap == y + 1) cap++;
                                         if (isBlockBreakable(relative)) {
                                             Collection<ItemStack> drops = relative.getDrops();
                                             if (y == 0)
@@ -92,9 +91,17 @@ public class LumberjackRunnable extends BukkitRunnable {
                                 }
                             }
                             world.playSound(base.getLocation(), Sound.BLOCK_WOOD_BREAK, 1, 1);
+                            saplingCount = lumberjackBlock.getSaplingCount();
+                            if (base.getType() == Material.AIR) {
+                                if (saplingCount > 0) {
+                                    base.setType(saplingMaterial);
+                                    lumberjackBlock.removeSapling(saplingMaterial);
+                                }
+                            }
                         }
                     }
                 }
+
             }
         }
     }
