@@ -3,7 +3,6 @@ package com.firesoftitan.play.titanbox.titanmachines.guis;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerVisualManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
-import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -161,7 +160,7 @@ public class SorterGUI {
                     if (ItemSorterManager.instance.hasSorter(player)) {
                         if (ItemSorterManager.isSortingContainer(location)) {
                             BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, location);
-                            ItemStack added = ItemSorterManager.instance.addChest(player, location, SensibleToolboxSupport.instance.getOutputItem(location));
+                            ItemStack added = ItemSorterManager.instance.addChest(player, location, SensibleToolboxSupport.instance.getStoredItem(location));
                             ItemSorterManager.instance.setSettingsSortingFacing(player, location, settingsSortingFacing);
                             ItemSorterManager.instance.setSettingsSortingLock(player, location);
                             if (!TitanMachines.itemStackTool.isEmpty(added)) {

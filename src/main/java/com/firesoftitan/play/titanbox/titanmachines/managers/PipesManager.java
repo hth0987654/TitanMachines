@@ -1,11 +1,15 @@
 package com.firesoftitan.play.titanbox.titanmachines.managers;
 
+import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.PipeBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestType;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -15,12 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class PipesManager {
-    public static PipesManager instance;
-    private final BlockFace[] blockFaces = {BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH,BlockFace.NORTH,BlockFace.EAST,BlockFace.WEST};
-    public PipesManager() {
-        instance = this;
-    }
-    public  List<Location> getConnections(Location location)
+    private static final BlockFace[] blockFaces = {BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH,BlockFace.NORTH,BlockFace.EAST,BlockFace.WEST};
+
+    public static  List<Location> getConnections(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         List<Location> outList = new ArrayList<Location>();
@@ -33,8 +34,8 @@ public class PipesManager {
         return outList;
     }
 
-    private final SaveManager pipes = new SaveManager(TitanMachines.instants.getName(), "pipes");
-    public void remove(Location location)
+    private static final SaveManager pipes = new SaveManager(TitanMachines.instants.getName(), "pipes");
+    public static void remove(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         UUID id = getGroup(location);
@@ -76,10 +77,10 @@ public class PipesManager {
         }
         cleanSave();
         long passed = System.currentTimeMillis() - start;
-        if (passed > 100) System.out.println("pipe break: " + passed);
+        if (passed > 100) TitanMachines.messageTool.sendMessageSystem("pipe break: " + passed);
     }
 
-    private void cleanSave() {
+    private static void cleanSave() {
         for(String keyChest: pipes.getKeys("chest"))
         {
             for(String keyChestGroup: pipes.getKeys("chest." + keyChest + ".settings"))
@@ -103,7 +104,7 @@ public class PipesManager {
         }
     }
 
-    private void relabelGroup(Location location, UUID newGroup, UUID oldGroup, List<String> checkList)
+    private static void relabelGroup(Location location, UUID newGroup, UUID oldGroup, List<String> checkList)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
 
@@ -124,24 +125,24 @@ public class PipesManager {
                 }
                 if (isChestConnected(locationConnection))
                 {
-                    PipeChestType chestSettingsType = this.getChestSettingsType(locationConnection, oldGroup);
-                    List<Integer> chestSettingsFilterAccessSlots = this.getChestSettingsFilterAccessSlots(locationConnection, oldGroup);
+                    PipeChestType chestSettingsType = PipesManager.getChestSettingsType(locationConnection, oldGroup);
+                    List<Integer> chestSettingsFilterAccessSlots = PipesManager.getChestSettingsFilterAccessSlots(locationConnection, oldGroup);
                     HashMap<Integer, ItemStack > itemStack = new HashMap<Integer, ItemStack>();
                     HashMap<Integer, PipeChestFilterType > chestSettingsFilterType= new HashMap<Integer, PipeChestFilterType>();
                     for(int k: chestSettingsFilterAccessSlots) {
                     //for(int k =0; k < 2; k++) {
-                        itemStack.put(k,this.getChestSettingsFilter(locationConnection, oldGroup, k));
-                        chestSettingsFilterType.put(k, this.getChestSettingsFilterType(locationConnection, oldGroup, k));
+                        itemStack.put(k,PipesManager.getChestSettingsFilter(locationConnection, oldGroup, k));
+                        chestSettingsFilterType.put(k, PipesManager.getChestSettingsFilterType(locationConnection, oldGroup, k));
                     }
 
                     removeChest(locationConnection);
                     scanPlacedChest(locationConnection);
 
-                    this.setChestSettingsType(locationConnection, newGroup, chestSettingsType);
+                    PipesManager.setChestSettingsType(locationConnection, newGroup, chestSettingsType);
                     for(int k: chestSettingsFilterAccessSlots) {
                     //for(int k =0; k < 2; k++) {
-                        this.setChestSettingsFilter(locationConnection, newGroup, k, itemStack.get(k));
-                        this.setChestSettingsFilterType(locationConnection, newGroup, k, chestSettingsFilterType.get(k));
+                        PipesManager.setChestSettingsFilter(locationConnection, newGroup, k, itemStack.get(k));
+                        PipesManager.setChestSettingsFilterType(locationConnection, newGroup, k, chestSettingsFilterType.get(k));
                     }
 
                 }
@@ -149,7 +150,7 @@ public class PipesManager {
         }
     }
 
-    public void add(Location location)
+    public static void add(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         pipes.set("pipes." + key + ".location", location);
@@ -158,24 +159,24 @@ public class PipesManager {
         List<BlockFace> hologramConnections = new ArrayList<BlockFace>();
         for(BlockFace blockFace: blockFaces)
         {
-            Location testLocation = location.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
-            if (isPipe(testLocation))
+            Location locationToCheck = location.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
+            if (isPipe(locationToCheck))
             {
                 hologramConnections.add(blockFace);
                 if (id == null) {
-                    //add pipe to existing group
-                    id = getGroup(testLocation);
+                    //add pipe to an existing group
+                    id = getGroup(locationToCheck);
                     addToGroup(location, id);
                 }
                 else
                 {
-                    //if two groups meet merge them to groupA
-                    if (!getGroup(testLocation).equals(id)) {
-                        mergeGroup(id, getGroup(testLocation));
+                    //if two groups meet, merge them to groupA
+                    if (!getGroup(locationToCheck).equals(id)) {
+                        mergeGroup(id, getGroup(locationToCheck));
                     }
                 }
-                addConnection(location, testLocation);
-                addConnection(testLocation, location);
+                addConnection(location, locationToCheck);
+                addConnection(locationToCheck, location);
             }
         }
         if (getGroup(location) == null)
@@ -188,7 +189,8 @@ public class PipesManager {
         addHologram(location, hologramConnections);
 
     }
-    public void checkHologram(Location location)
+    @SuppressWarnings("unused")
+    public static void checkHologram(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         UUID uuid = pipes.getUUID("pipes." + key + ".hologram");
@@ -209,7 +211,7 @@ public class PipesManager {
             addHologram(location, blockFacesChest);
         }
     }
-    private void addHologram(Location location, List<BlockFace> hologramConnections) {
+    private static void addHologram(Location location, List<BlockFace> hologramConnections) {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         int modelNumber = getModelNumber(hologramConnections);
 
@@ -236,7 +238,42 @@ public class PipesManager {
 
     }
 
-    public void checkSurroundings(Location location)
+/*    public static void rescanAllPipes()
+    {
+        int i = 0;
+        System.out.println("Starting: Upgrading all pipes to TitanPipes");
+        for(String key: pipes.getKeys("pipes"))
+        {
+            Location location = pipes.getLocation("pipes." + key + ".location");
+            if (location != null)
+            {
+                i++;
+                checkForOldVersion(location);
+            }
+        }
+        System.out.println("Done: Upgrading all pipes to TitanPipes");
+        System.out.println("Found: " + i);
+    }
+    private static void checkForOldVersion(Location location)
+    {
+        if (location != null && PipesManager.isPipe(location))
+        {
+            TitanBlock block = TitanBlock.getBlock(location);
+            if (block == null)
+            {
+                PipeBlock titanBlock = new PipeBlock(PipeBlock.titanID, TitanMachines.instants.getPipe(), location);
+                TitanBlockManager.setTitanBlock(titanBlock, location);
+                titanBlock.setup();
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        location.getBlock().setType(Material.BARRIER);
+                    }
+                }.runTaskLater(TitanMachines.instants, 2);
+            }
+        }
+    }*/
+    public static void checkSurroundings(Location location)
     {
         for(BlockFace blockFace: blockFaces)
         {
@@ -247,7 +284,7 @@ public class PipesManager {
             }
         }
     }
-    private List<BlockFace> scanChestOrientation(Location location) {
+    private static List<BlockFace> scanChestOrientation(Location location) {
         List<BlockFace> hologramConnections = new ArrayList<BlockFace>();
         for(BlockFace blockFace: blockFaces)
         {
@@ -255,14 +292,14 @@ public class PipesManager {
             if (ContainerManager.isContainer(testLocation))
             {
                 UUID group = getGroup(location);
-                PipeChestType chestSettingsType = PipesManager.instance.getChestSettingsType(testLocation, group);
+                PipeChestType chestSettingsType = PipesManager.getChestSettingsType(testLocation, group);
                 if (chestSettingsType != PipeChestType.NOT_CONNECTED) hologramConnections.add(blockFace);
             }
         }
         return hologramConnections;
     }
 
-    public void rescanPipeOrientation(Location location)
+    public static void rescanPipeOrientation(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         UUID uuid = pipes.getUUID("pipes." + key + ".hologram");
@@ -325,7 +362,7 @@ public class PipesManager {
         }
     }
 
-    public int getModelNumber(List<BlockFace> connections)
+    public static int getModelNumber(List<BlockFace> connections)
     {
         int number = 30000;
         if ((connections.contains(BlockFace.UP) && connections.contains(BlockFace.DOWN) && connections.size() == 2)
@@ -341,7 +378,7 @@ public class PipesManager {
 
         return number;
     }
-    public void scanPlacedChest(Location location) {
+    public static void scanPlacedChest(Location location) {
 
         for(BlockFace blockFace: blockFaces)
         {
@@ -353,7 +390,7 @@ public class PipesManager {
             }
         }
     }
-    private List<BlockFace> scanForChest(Location location) {
+    private static List<BlockFace> scanForChest(Location location) {
         List<BlockFace> hologramConnections = new ArrayList<BlockFace>();
         for(BlockFace blockFace: blockFaces)
         {
@@ -367,7 +404,7 @@ public class PipesManager {
         }
         return hologramConnections;
     }
-    public List<Integer> getChestSettingsFilterAccessSlots(Location chest, UUID group)
+    public static List<Integer> getChestSettingsFilterAccessSlots(Location chest, UUID group)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         Set<String> keys = pipes.getKeys("chest." + key + ".settings." + group + ".filter");
@@ -378,38 +415,38 @@ public class PipesManager {
         }
         return out;
     }
-    public void setChestSettingsFilter(Location chest, UUID group, int slot, ItemStack itemStack)
+    public static void setChestSettingsFilter(Location chest, UUID group, int slot, ItemStack itemStack)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".filter." + slot + ".item", itemStack);
     }
-    public ItemStack getChestSettingsFilter(Location chest, UUID group, int slot) {
+    public static ItemStack getChestSettingsFilter(Location chest, UUID group, int slot) {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         return pipes.getItem("chest." + key + ".settings." + group + ".filter." + slot + ".item");
     }
-    public void clearChestSettingsFilterType(Location chest, UUID group)
+    public static void clearChestSettingsFilterType(Location chest, UUID group)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.delete("chest." + key + ".settings." + group + ".filter");
     }
-    public void setChestSettingsFilterType(Location chest, UUID group, int slot, PipeChestFilterType type)
+    public static void setChestSettingsFilterType(Location chest, UUID group, int slot, PipeChestFilterType type)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".filter." + slot + ".type", type.getValue());
     }
-    public PipeChestFilterType getChestSettingsFilterType(Location chest, UUID group, int slot) {
+    public static PipeChestFilterType getChestSettingsFilterType(Location chest, UUID group, int slot) {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot + ".type") && slot > 0) return PipeChestFilterType.DISABLED;
         int anInt = pipes.getInt("chest." + key + ".settings." + group + ".filter." + slot + ".type");
         return PipeChestFilterType.getPipeChestType(anInt);
     }
 
-    public void setChestSettingsType(Location chest, UUID group, PipeChestType type)
+    public static void setChestSettingsType(Location chest, UUID group, PipeChestType type)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".type", type.getValue());
     }
-    public PipeChestType getChestSettingsType(Location chest, UUID group)
+    public static PipeChestType getChestSettingsType(Location chest, UUID group)
     {
         if (group == null) return PipeChestType.NOT_CONNECTED;
         String key = TitanMachines.serializeTool.serializeLocation(chest);
@@ -417,7 +454,7 @@ public class PipesManager {
         int anInt = pipes.getInt("chest." + key + ".settings." + group + ".type");
         return PipeChestType.getPipeChestType(anInt);
     }
-    private void removeConnection(Location pipe)
+    private static void removeConnection(Location pipe)
     {
         String key = TitanMachines.serializeTool.serializeLocation(pipe);
         for(int i = 0; i < 7; i++) {
@@ -441,7 +478,7 @@ public class PipesManager {
             }
         }
     }
-    private void removeChestConnection(Location chest, Location pipe)
+    private static void removeChestConnection(Location chest, Location pipe)
     {
         UUID uuid = getGroup(pipe);
         String key = TitanMachines.serializeTool.serializeLocation(chest);
@@ -466,7 +503,7 @@ public class PipesManager {
         }
     }
 
-    public void removeChest(Location chest)
+    public static void removeChest(Location chest)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         for(int i = 0; i < 7; i++) {
@@ -492,14 +529,14 @@ public class PipesManager {
         }
         //pipes.delete("chest." + key);
     }
-    public boolean isChestConnected(Location chest)
+    public static boolean isChestConnected(Location chest)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         return pipes.contains("chest." + key);
     }
 
 
-    public List<UUID> getChestGroups(Location chest)
+    public static List<UUID> getChestGroups(Location chest)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         List<UUID> outList = new ArrayList<UUID>();
@@ -511,12 +548,12 @@ public class PipesManager {
         }
         return outList;
     }
-    private void addChestConnection(Location pipe, Location chest)
+    private static void addChestConnection(Location pipe, Location chest)
     {
         UUID group = getGroup(pipe);
         addChestConnection(pipe, chest, group);
     }
-    private void addChestConnection(Location from, Location chest, UUID group)
+    private static void addChestConnection(Location from, Location chest, UUID group)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("groups." + group + ".chest." + key + ".location", chest);
@@ -532,7 +569,7 @@ public class PipesManager {
             }
         }
     }
-    private void addConnection(Location pipe, Location connection)
+    private static void addConnection(Location pipe, Location connection)
     {
         String key = TitanMachines.serializeTool.serializeLocation(pipe);
         for(int i = 0; i < 7; i++) {
@@ -543,7 +580,7 @@ public class PipesManager {
             }
         }
     }
-    public List<Location> getOutChestsInGroup(UUID group)
+    public static List<Location> getOutChestsInGroup(UUID group)
     {
         List<Location> locations = new ArrayList<Location>();
         Set<String> groups = pipes.getKeys("groups." + group + ".chest");
@@ -551,14 +588,14 @@ public class PipesManager {
         {
             Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
             if (location != null) {
-                PipeChestType chestSettingsType = PipesManager.instance.getChestSettingsType(location, group);
+                PipeChestType chestSettingsType = PipesManager.getChestSettingsType(location, group);
                 if (chestSettingsType == PipeChestType.CHEST_OUT) locations.add(location);
             }
 
         }
         return locations;
     }
-    public List<Location> getOverflowInGroup(UUID group)
+    public static List<Location> getOverflowInGroup(UUID group)
     {
         List<Location> locations = new ArrayList<Location>();
         List<Location> locationsLast = new ArrayList<Location>();
@@ -567,9 +604,9 @@ public class PipesManager {
         {
             Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
             if (location != null) {
-                PipeChestType chestSettingsType = PipesManager.instance.getChestSettingsType(location, group);
+                PipeChestType chestSettingsType = PipesManager.getChestSettingsType(location, group);
                 if (chestSettingsType == PipeChestType.OVERFLOW) {
-                    PipeChestFilterType chestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(location, group, 0);
+                    PipeChestFilterType chestSettingsFilterType = PipesManager.getChestSettingsFilterType(location, group, 0);
                     if (chestSettingsFilterType != PipeChestFilterType.ALL) locations.add(location);
                     else locationsLast.add(location);
                 }
@@ -579,7 +616,7 @@ public class PipesManager {
         locations.addAll(locationsLast);
         return locations;
     }
-    public List<Location> getInChestsInGroup(UUID group)
+    public static List<Location> getInChestsInGroup(UUID group)
     {
         List<Location> locations = new ArrayList<Location>();
         List<Location> locationsLast = new ArrayList<Location>();
@@ -588,9 +625,9 @@ public class PipesManager {
         {
             Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
             if (location != null) {
-                PipeChestType chestSettingsType = PipesManager.instance.getChestSettingsType(location, group);
+                PipeChestType chestSettingsType = PipesManager.getChestSettingsType(location, group);
                 if (chestSettingsType == PipeChestType.CHEST_IN) {
-                    PipeChestFilterType chestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(location, group, 0);
+                    PipeChestFilterType chestSettingsFilterType = PipesManager.getChestSettingsFilterType(location, group, 0);
                     if (chestSettingsFilterType != PipeChestFilterType.ALL) locations.add(location);
                     else locationsLast.add(location);
                 }
@@ -600,7 +637,8 @@ public class PipesManager {
         locations.addAll(locationsLast);
         return locations;
     }
-    public List<Location> getChestsInGroup(UUID group)
+    @SuppressWarnings("unused")
+    public static List<Location> getChestsInGroup(UUID group)
     {
         List<Location> locations = new ArrayList<Location>();
         Set<String> groups = pipes.getKeys("groups." + group + ".chest");
@@ -613,7 +651,7 @@ public class PipesManager {
         }
         return locations;
     }
-    public List<UUID> getGroups()
+    public static List<UUID> getGroups()
     {
         List<UUID> output = new ArrayList<UUID>();
         Set<String> groups = pipes.getKeys("groups");
@@ -624,86 +662,85 @@ public class PipesManager {
         }
         return output;
     }
-    public Boolean hasGroup(UUID uuid)
+    public static Boolean hasGroup(UUID uuid)
     {
         return pipes.contains("groups." + uuid.toString());
     }
-    public UUID getGroup(Location location)
+    public static UUID getGroup(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         return pipes.getUUID("pipes." + key + ".groupid");
     }
-    public void addToGroup(Location pipe, UUID group)
+    public static void addToGroup(Location pipe, UUID group)
     {
         String key = TitanMachines.serializeTool.serializeLocation(pipe);
         pipes.set("pipes." + key + ".groupid", group);
         pipes.set("groups." + group + ".pipes." + key + ".location", pipe);
     }
-    public int getGroupSize(UUID group)
+    public static int getGroupSize(UUID group)
     {
         Set<String> keys = pipes.getKeys("groups." + group + ".pipes");
         if (keys == null) return 0;
         return keys.size();
     }
-    private void mergeGroup(UUID groupA, UUID groupB)
+    private static void mergeGroup(UUID keepingGroup, UUID removingGroup)
     {
-        for(String key: pipes.getKeys("groups." + groupB + ".pipes"))
+        for(String key: pipes.getKeys("groups." + removingGroup + ".pipes"))
         {
             Location location = pipes.getLocation("pipes." + key + ".location");
             if (location != null) {
-                addToGroup(location, groupA);
+                addToGroup(location, keepingGroup);
             }
         }
-        for(String key: pipes.getKeys("groups." + groupB + ".chest"))
+        for(String key: pipes.getKeys("groups." + removingGroup + ".chest"))
         {
-            Location location = pipes.getLocation("groups." + groupB + ".chest." + key + ".location");
-            pipes.set("groups." + groupA + ".chest." + key + ".location", location);
+            Location location = pipes.getLocation("groups." + removingGroup + ".chest." + key + ".location");
+            pipes.set("groups." + keepingGroup + ".chest." + key + ".location", location);
             for(int i = 0; i < 7; i++) {
                 UUID uuid = pipes.getUUID("chest." + key + ".groups." + i + ".id");
-                if (uuid != null && uuid.equals(groupB))
+                if (uuid != null && !uuid.equals(removingGroup))
                 {
-                    pipes.set("chest." + key + ".groups." + i + ".id", groupA);
+                    pipes.set("chest." + key + ".groups." + i + ".id", keepingGroup);
                     //Setting merge\
-                    PipeChestType chestSettingsType = PipeChestType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + groupB + ".type"));
-                    if (!pipes.contains("chest." + key + ".settings." + groupB + ".type"))
-                        chestSettingsType = PipeChestType.CHEST_IN;
-                    pipes.set("chest." + key + ".settings." + groupA + ".type", chestSettingsType.getValue());
+                    PipeChestType chestSettingsType = PipeChestType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".type"));
+                    if (!pipes.contains("chest." + key + ".settings." + removingGroup + ".type")) chestSettingsType = PipeChestType.CHEST_IN;
+                    pipes.set("chest." + key + ".settings." + keepingGroup + ".type", chestSettingsType.getValue());
 
-                    Set<String> keys = pipes.getKeys("chest." + key + ".settings." + groupB + ".filter");
+                    Set<String> keys = pipes.getKeys("chest." + key + ".settings." + removingGroup + ".filter");
                     List<Integer> chestSettingsFilterAccessSlots = new ArrayList<Integer>();
                     for(String s: keys)
                     {
                         chestSettingsFilterAccessSlots.add(Integer.parseInt(s));
                     }
                     for (int k: chestSettingsFilterAccessSlots) {
-                        ItemStack itemStack = pipes.getItem("chest." + key + ".settings." + groupB + ".filter." + k + ".item");
-                        PipeChestFilterType chestSettingsFilterType = PipeChestFilterType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + groupB + ".filter." + k + ".type"));
-                        pipes.set("chest." + key + ".settings." + groupA + ".filter." + k + ".item", itemStack);
-                        pipes.set("chest." + key + ".settings." + groupA + ".filter." + k + ".type", chestSettingsFilterType.getValue());
+                        ItemStack itemStack = pipes.getItem("chest." + key + ".settings." + removingGroup + ".filter." + k + ".item");
+                        PipeChestFilterType chestSettingsFilterType = PipeChestFilterType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".filter." + k + ".type"));
+                        pipes.set("chest." + key + ".settings." + keepingGroup + ".filter." + k + ".item", itemStack);
+                        pipes.set("chest." + key + ".settings." + keepingGroup + ".filter." + k + ".type", chestSettingsFilterType.getValue());
                     }
                 }
             }
 
         }
-        deleteGroup(groupB);
+        deleteGroup(removingGroup);
     }
-    public void deleteGroup(UUID group)
+    public static void deleteGroup(UUID group)
     {
         pipes.delete("groups." + group);
     }
 
     @NotNull
-    private UUID getNewUUID() {
+    private static UUID getNewUUID() {
         UUID id = UUID.randomUUID();
         if (pipes.contains("groups." + id )) return getNewUUID();
         return id;
     }
-    public boolean isPipe(Location location)
+    public static boolean isPipe(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         return pipes.contains("pipes." + key);
     }
-    public void save()
+    public static void save()
     {
         pipes.save();
     }

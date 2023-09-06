@@ -12,10 +12,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +44,10 @@ public class JunctionBoxGUI {
         return key;
     }
 
+    /**
+     * @return player viewing gui.
+     */
+    @SuppressWarnings("unused")
     public Player getPlayer() {
         return player;
     }
@@ -51,7 +55,6 @@ public class JunctionBoxGUI {
     public void render()
     {
 
-        boolean sorting = false;
         ItemStack borderItem = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
         for(int i = 0; i < size; i++)
         {
@@ -62,7 +65,7 @@ public class JunctionBoxGUI {
         if (junctionBoxBlock == null) return;
         updateInventoryWindow();
 
-        ItemStack item = borderItem.clone();
+        ItemStack item;
         int i = 18;
         for (BlockFace face: JunctionBoxBlock.blockFaces) {
             item = new ItemStack(Material.GREEN_SHULKER_BOX);
@@ -72,7 +75,7 @@ public class JunctionBoxGUI {
                 item = new ItemStack(Material.RED_SHULKER_BOX);
                 s = "This is the current inventory being shown.";
             }
-            item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Inventory: " + ChatColor.WHITE + face );
+            item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "Inventory: " + ChatColor.GREEN + face );
             item = TitanMachines.itemStackTool.addLore(item, ChatColor.AQUA + s);
             item = addFilterList(face, junctionBoxBlock, item);
             item = TitanMachines.nbtTool.set(item, "button", i);
@@ -83,6 +86,7 @@ public class JunctionBoxGUI {
         }
         i = 27;
         for (BlockFace face: JunctionBoxBlock.blockFaces) {
+            List<ItemStack> filterList = junctionBoxBlock.getFilterList(face);
             item = new ItemStack(Material.ANVIL);
             if (select.containsKey(player.getUniqueId()))
             {
@@ -94,8 +98,8 @@ public class JunctionBoxGUI {
 
                 }
             }
-            item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Move this items to: " + ChatColor.WHITE + face);
-            item = TitanMachines.itemStackTool.addLore(item, ChatColor.AQUA + "Click here to add/remove item from your inventory.");
+            item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "Move this items to: " + ChatColor.GREEN + face);
+            item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Click here to add/remove item from your inventory.", ChatColor.WHITE + "Right click to cancel", ChatColor.YELLOW + "Items: " + ChatColor.GREEN + filterList.size() + "/20");
             item = addFilterList(face, junctionBoxBlock, item);
             item = TitanMachines.nbtTool.set(item, "button", i);
             item = TitanMachines.nbtTool.set(item, "location", this.location);
@@ -106,12 +110,12 @@ public class JunctionBoxGUI {
         i = 36;
         for (BlockFace face: JunctionBoxBlock.blockFaces) {
             item = new ItemStack(Material.NETHER_STAR);
-            item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Set to No Filter: " + ChatColor.WHITE + face);
-            item = TitanMachines.itemStackTool.addLore(item, ChatColor.GRAY + "Click here to set this slot to catch everything that doesn't have a filter");
+            item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "Set to No Filter: " + ChatColor.GREEN + face);
+            item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Click here to set this slot to catch everything that doesn't have a filter");
             if (junctionBoxBlock.getNoFilter() == face)
             {
                 item = new ItemStack(Material.DISPENSER);
-                item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "This is the No Filter slot: " + ChatColor.WHITE + face);
+                item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "This is the No Filter slot: " + ChatColor.GREEN + face);
             }
 
             item = TitanMachines.nbtTool.set(item, "button", i);
@@ -123,12 +127,12 @@ public class JunctionBoxGUI {
         i = 45;
         for (BlockFace face: JunctionBoxBlock.blockFaces) {
             item = new ItemStack(Material.NETHER_STAR);
-            item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Set to Overflow: " + ChatColor.WHITE + face);
-            item = TitanMachines.itemStackTool.addLore(item, ChatColor.GRAY + "Click here to set this slot to overflow, when this section is full it will be moved here.");
+            item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "Set to Overflow: " + ChatColor.GREEN + face);
+            item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Click here to set this slot to overflow, when this section is full it will be moved here.");
             if (junctionBoxBlock.getOverflow() == face)
             {
                 item = new ItemStack(Material.DROPPER);
-                item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "This is the Overflow slot: " + ChatColor.WHITE + face);
+                item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "This is the Overflow slot: " + ChatColor.GREEN + face);
             }
 
             item = TitanMachines.nbtTool.set(item, "button", i);
@@ -148,28 +152,28 @@ public class JunctionBoxGUI {
 
     private static ItemStack addFilterList(BlockFace face, JunctionBoxBlock junctionBoxBlock, ItemStack item) {
         List<ItemStack> filterList = junctionBoxBlock.getFilterList(face);
-        item = TitanMachines.itemStackTool.addLore(item, ChatColor.AQUA + "Number of Items: " + filterList.size());
         for (ItemStack itemStack: filterList)
         {
             String name1 = TitanMachines.itemStackTool.getName(itemStack);
             name1 = TitanMachines.formattingTool.fixCapitalization(name1);
             if (junctionBoxBlock.getFilterType(face, itemStack).getValue() > -1)
-                item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + name1 + ": " + ChatColor.YELLOW + junctionBoxBlock.getFilterType(face, itemStack).getCaption());
+                item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + name1 + ": " + ChatColor.GREEN + junctionBoxBlock.getFilterType(face, itemStack).getCaption());
         }
         return item;
     }
 
-    @NotNull
     private void updateInventoryWindow() {
         TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, this.location);
         JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-        Inventory inventory1 = junctionBoxBlock.getInventory(currentFace);
-        for (int i = 0; i < inventory1.getSize(); i++)
-        {
-            this.inventory.setItem(i, inventory1.getItem(i));
+        if (junctionBoxBlock != null) {
+            Inventory inventory1 = junctionBoxBlock.getInventory(currentFace);
+            for (int i = 0; i < inventory1.getSize(); i++) {
+                this.inventory.setItem(i, inventory1.getItem(i));
+            }
         }
     }
 
+    @SuppressWarnings("unused")
     public BlockFace getCurrentFace() {
         return currentFace;
     }
@@ -190,11 +194,17 @@ public class JunctionBoxGUI {
             SelectorGUI s = select.get(player.getUniqueId());
             TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, s.getLocation());
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-            List<ItemStack> filterList = junctionBoxBlock.getFilterList(s.getBlockFace());
-            filterList.add(item.clone());
-            junctionBoxBlock.setFilterList(s.getBlockFace(), filterList);
-            junctionBoxBlock.setFilterType(s.getBlockFace(), item, s.getPipeChestFilterType());
-            select.remove(player.getUniqueId());
+            if (junctionBoxBlock != null) {
+                List<ItemStack> filterList = junctionBoxBlock.getFilterList(s.getBlockFace());
+                if (s.getPipeChestFilterType() == PipeChestFilterType.DISABLED || filterList.size() < 20)
+                {
+                    filterList.add(item.clone());
+                    junctionBoxBlock.setFilterType(s.getBlockFace(), item, s.getPipeChestFilterType());
+                    junctionBoxBlock.setFilterList(s.getBlockFace(), filterList);
+
+                    select.remove(player.getUniqueId());
+                }
+            }
             JunctionBoxGUI junctionBoxGUI = new JunctionBoxGUI(player, s.getLocation());
             junctionBoxGUI.setCurrentFace(s.getcurrentBlockFace());
             junctionBoxGUI.open();
@@ -202,8 +212,16 @@ public class JunctionBoxGUI {
 
 
     }
-    public static void onClickButtonEvent(Player player, Integer button, Location location, Location sorting, BlockFace blockFace) {
+    public static void onClickButtonEvent(Player player, Integer button, Location location, Location sorting, BlockFace blockFace, ClickType clickType) {
         SelectorGUI s = select.get(player.getUniqueId());
+        if (clickType == ClickType.RIGHT && s != null)
+        {
+            select.remove(player.getUniqueId());
+            JunctionBoxGUI junctionBoxGUI = new JunctionBoxGUI(player, location);
+            junctionBoxGUI.setCurrentFace(blockFace);
+            junctionBoxGUI.open();
+            return;
+        }
         if (button >= 18 && button < 18 + JunctionBoxBlock.blockFaces.length)
         {
             int select = button - 18;
@@ -235,8 +253,7 @@ public class JunctionBoxGUI {
             BlockFace blockFace1 = JunctionBoxBlock.blockFaces[button - 36];
             TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock convert = JunctionBoxBlock.convert(titanBlock);
-            convert.setNoFilter(blockFace1);
-
+            if (convert != null) convert.setNoFilter(blockFace1);
             JunctionBoxGUI junctionBoxGUI = new JunctionBoxGUI(player, location);
             junctionBoxGUI.setCurrentFace(blockFace);
             junctionBoxGUI.open();
@@ -246,7 +263,7 @@ public class JunctionBoxGUI {
             BlockFace blockFace1 = JunctionBoxBlock.blockFaces[button - 45];
             TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
             JunctionBoxBlock convert = JunctionBoxBlock.convert(titanBlock);
-            convert.setOverflow(blockFace1);
+            if (convert != null) convert.setOverflow(blockFace1);
 
             JunctionBoxGUI junctionBoxGUI = new JunctionBoxGUI(player, location);
             junctionBoxGUI.setCurrentFace(blockFace);

@@ -1,8 +1,11 @@
 package com.firesoftitan.play.titanbox.titanmachines.listeners;
 
+import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
+import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.LibsItemStackTool;
 import com.firesoftitan.play.titanbox.libs.tools.LibsNBTTool;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.PipeBlock;
 import com.firesoftitan.play.titanbox.titanmachines.guis.AdvancedPipeGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
@@ -253,7 +256,8 @@ public class MainListener implements Listener {
                         Location location = TitanMachines.nbtTool.getLocation(clicked, "location");
                         Location sorting = TitanMachines.nbtTool.getLocation(clicked, "sorting");
                         BlockFace currentFace = BlockFace.valueOf(TitanMachines.nbtTool.getString(clicked, "current_face"));
-                        JunctionBoxGUI.onClickButtonEvent((Player) whoClicked, button, location, sorting, currentFace);
+
+                        JunctionBoxGUI.onClickButtonEvent((Player) whoClicked, button, location, sorting, currentFace, event.getClick());
                     }
                     else {
                         JunctionBoxGUI.setTypeSelect((Player) whoClicked, clicked);
@@ -278,105 +282,63 @@ public class MainListener implements Listener {
         ItemStack itemStack = event.getItem();
         Player player = event.getPlayer();
         Block clickedBlock = event.getClickedBlock();
-        if (PipesManager.instance.isPipe(clickedBlock.getLocation())) {
-            PipesManager.instance.rescanPipeOrientation(clickedBlock.getLocation());
-        }
-        if (action == Action.LEFT_CLICK_BLOCK && !TitanMachines.itemStackTool.isEmpty(itemStack))
-        {
-            Location clone = clickedBlock.getLocation().clone();
-            if (itemStack.getType() == Material.DIAMOND_PICKAXE || itemStack.getType() == Material.NETHERITE_PICKAXE
-                    || itemStack.getType() == Material.GOLDEN_PICKAXE  || itemStack.getType() == Material.IRON_PICKAXE
-                    || itemStack.getType() == Material.STONE_PICKAXE  || itemStack.getType() == Material.WOODEN_PICKAXE)
-            {
-
-                if (PipesManager.instance.isPipe(clone)) {
-                    PipesManager.instance.remove(clone);
-                    ItemStack itemSorter = TitanMachines.instants.getPipe();
-                    clone.getWorld().dropItem(clone, itemSorter.clone());
-                    clone.getBlock().setType(Material.AIR);
-
-/*                    Location add = clone.clone().add(0.5f, 0, 0.5f);
-                    TitanMachines.hologramTool.removeHologram(add);*/
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            PipesManager.instance.checkSurroundings(clone);
-                        }
-                    }.runTaskLater(TitanMachines.instants, 1);
-
-                }
-            }
-        }
         if (action == Action.RIGHT_CLICK_BLOCK && !player.isSneaking())
         {
-            if (BlockBreakerManager.instance.isBreaker(clickedBlock.getLocation()))
-            {
-                event.setCancelled(true);
-                boolean powered = BlockBreakerManager.instance.isPowered(clickedBlock.getLocation());
-                BlockBreakerManager.instance.setPower(clickedBlock.getLocation(), !powered);
-                if (powered) TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.RED + "OFF");else TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.GREEN + "ON");
-            }
-/*            if (LumberjackManager.instance.isLumberjack(clickedBlock.getLocation()))
-            {
-                event.setCancelled(true);
-                boolean powered = LumberjackManager.instance.isPowered(clickedBlock.getLocation());
-                LumberjackManager.instance.setPower(clickedBlock.getLocation(), !powered);
-                Material saplingMaterial = LumberjackManager.instance.getSaplingMaterial(clickedBlock.getLocation());
-                int saplingCount = LumberjackManager.instance.getSaplingCount(clickedBlock.getLocation());
-                if (powered) TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has been turned " + ChatColor.RED + "OFF");else TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has been turned " + ChatColor.GREEN + "ON");
-                if (saplingMaterial != null)TitanMachines.messageTool.sendMessagePlayer((Player) player, "Lumberjack has: " + ChatColor.AQUA + TitanMachines.tools.getFormattingTool().fixCapitalization(saplingMaterial.name()) + ChatColor.WHITE + " " +  ChatColor.GREEN + saplingCount + ChatColor.WHITE + "/" +  ChatColor.GREEN + "8" );
-
-            }*/
-        }
-
-        if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && !player.isSneaking()) {
-            if (PipesManager.instance.isPipe(clickedBlock.getLocation()))
-            {
-                PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, clickedBlock.getLocation());
-                pipeConnectionGUI.open();
-            }
-        }
-        if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && player.isSneaking()) {
-            if (SensibleToolboxSupport.instance.isSupported(clickedBlock.getLocation()) || clickedBlock.getState() instanceof Container) {
-                Location location = clickedBlock.getLocation();
-                //if (ItemSorterManager.instance.hasSorter(location)) {
-                if (ItemSorterManager.instance.hasSorter(player)) {
+            if (clickedBlock != null) {
+                if (BlockBreakerManager.instance.isBreaker(clickedBlock.getLocation())) {
                     event.setCancelled(true);
-                    ItemStack sortingItem = ItemSorterManager.instance.getSortingItem(player, location);
-                    if (!itemStackTool.isEmpty(sortingItem)) {
-                        if (ItemSorterManager.isSortingContainer(location)) {
-                            if (!ItemSorterManager.instance.getSettingsSortingLock(player, location)) {
-                                ItemSorterManager.instance.setSettingsSortingFacing(player, location, event.getBlockFace());
-                                ItemSorterManager.instance.setSettingsSortingLock(player, location);
-                            }
-                            SorterGUI sorterGUI = new SorterGUI((Player) player, location);
-                            sorterGUI.open();
-                        }
-                    }
+                    boolean powered = BlockBreakerManager.instance.isPowered(clickedBlock.getLocation());
+                    BlockBreakerManager.instance.setPower(clickedBlock.getLocation(), !powered);
+                    if (powered)
+                        TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.RED + "OFF");
                     else
-                    {
-                        ItemStack sortingItemA = ItemSorterManager.instance.getSortingItem(player, location);
-                        if (itemStackTool.isEmpty(sortingItemA)) {
-                            if (ItemSorterManager.isSortingContainer(location)) {
-                                ItemStack added = ItemSorterManager.instance.addChest(player, location, SensibleToolboxSupport.instance.getOutputItem(location));
-                                if (clickedBlock.getState() instanceof Container container) added = ItemSorterManager.instance.addChest(player, location, container.getInventory());
-                                if (!TitanMachines.itemStackTool.isEmpty(added)) {
-                                    if (!ItemSorterManager.instance.getSettingsSortingLock(player, location)) {
-                                        ItemSorterManager.instance.setSettingsSortingFacing(player, location, player.getFacing().getOppositeFace());
-                                        ItemSorterManager.instance.setSettingsSortingLock(player, location);
-                                    }
+                        TitanMachines.messageTool.sendMessagePlayer((Player) player, "Block breaker has been turned " + ChatColor.GREEN + "ON");
+                }
+            }
+        }
 
-                                    String name = TitanMachines.itemStackTool.getName(added);
-                                    TitanMachines.messageTool.sendMessagePlayer((Player) player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
-                                    return;
+        if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && player.isSneaking()) {
+            if (clickedBlock != null) {
+                if (SensibleToolboxSupport.instance.isSupported(clickedBlock.getLocation()) || clickedBlock.getState() instanceof Container) {
+                    Location location = clickedBlock.getLocation();
+                    //if (ItemSorterManager.instance.hasSorter(location)) {
+                    if (ItemSorterManager.instance.hasSorter(player)) {
+                        event.setCancelled(true);
+                        ItemStack sortingItem = ItemSorterManager.instance.getSortingItem(player, location);
+                        if (!itemStackTool.isEmpty(sortingItem)) {
+                            if (ItemSorterManager.isSortingContainer(location)) {
+                                if (!ItemSorterManager.instance.getSettingsSortingLock(player, location)) {
+                                    ItemSorterManager.instance.setSettingsSortingFacing(player, location, event.getBlockFace());
+                                    ItemSorterManager.instance.setSettingsSortingLock(player, location);
+                                }
+                                SorterGUI sorterGUI = new SorterGUI((Player) player, location);
+                                sorterGUI.open();
+                            }
+                        } else {
+                            ItemStack sortingItemA = ItemSorterManager.instance.getSortingItem(player, location);
+                            if (itemStackTool.isEmpty(sortingItemA)) {
+                                if (ItemSorterManager.isSortingContainer(location)) {
+                                    ItemStack added = ItemSorterManager.instance.addChest(player, location, SensibleToolboxSupport.instance.getStoredItem(location));
+                                    if (clickedBlock.getState() instanceof Container container)
+                                        added = ItemSorterManager.instance.addChest(player, location, container.getInventory());
+                                    if (!TitanMachines.itemStackTool.isEmpty(added)) {
+                                        if (!ItemSorterManager.instance.getSettingsSortingLock(player, location)) {
+                                            ItemSorterManager.instance.setSettingsSortingFacing(player, location, player.getFacing().getOppositeFace());
+                                            ItemSorterManager.instance.setSettingsSortingLock(player, location);
+                                        }
+
+                                        String name = TitanMachines.itemStackTool.getName(added);
+                                        TitanMachines.messageTool.sendMessagePlayer((Player) player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
+                                        return;
+                                    }
                                 }
                             }
+                            TitanMachines.messageTool.sendMessagePlayer((Player) player, "This chest hasn't been set for sorting");
+                            TitanMachines.messageTool.sendMessagePlayer((Player) player, "Place item in chest, to add it.");
                         }
-                        TitanMachines.messageTool.sendMessagePlayer((Player) player, "This chest hasn't been set for sorting");
-                        TitanMachines.messageTool.sendMessagePlayer((Player) player, "Place item in chest, to add it.");
                     }
-                }
 
+                }
             }
         }
     }
@@ -403,9 +365,6 @@ public class MainListener implements Listener {
             event.setDropItems(false);
             if (clone.getWorld() != null) clone.getWorld().dropItem(clone, chunkHopper.clone());
         }
-        if (PipesManager.instance.isPipe(clone)) {
-            event.setCancelled(true);
-        }
         if (TrashBarrelManager.instance.isTrashBarrel(clone))
         {
             TrashBarrelManager.instance.remove(clone);
@@ -413,13 +372,6 @@ public class MainListener implements Listener {
             event.setDropItems(false);
             if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
         }
-/*        if (LumberjackManager.instance.isLumberjack(clone))
-        {
-            LumberjackManager.instance.remove(clone);
-            ItemStack itemSorter = TitanMachines.instants.getLumberjack();
-            event.setDropItems(false);
-            if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
-        }*/
         if (BlockBreakerManager.instance.isBreaker(clone))
         {
             BlockBreakerManager.instance.remove(clone);
@@ -460,9 +412,9 @@ public class MainListener implements Listener {
         if (block.getState() instanceof Container state)
         {
             Location location = state.getInventory().getLocation();
-            if (PipesManager.instance.isChestConnected(location))
+            if (PipesManager.isChestConnected(location))
             {
-                PipesManager.instance.removeChest(location);
+                PipesManager.removeChest(location);
             }
             if(ItemSorterManager.instance.hasSorter(event.getPlayer())) {
                 if (ItemSorterManager.instance.getSortingItem(event.getPlayer(), location) != null) {
@@ -474,9 +426,9 @@ public class MainListener implements Listener {
         if (SensibleToolboxSupport.instance.isSupported(block.getLocation()))
         {
             Location location = block.getLocation();
-            if (PipesManager.instance.isChestConnected(location))
+            if (PipesManager.isChestConnected(location))
             {
-                PipesManager.instance.removeChest(location);
+                PipesManager.removeChest(location);
             }
             if(ItemSorterManager.instance.hasSorter(event.getPlayer())) {
                 if (ItemSorterManager.instance.getSortingItem(event.getPlayer(), location) != null) {
@@ -510,12 +462,24 @@ public class MainListener implements Listener {
         ItemStack itemInHand = event.getItemInHand();
         Block block = event.getBlock();
         Location location = block.getLocation();
+        //upgrade old pipes
+        if (nbtTool.getBoolean(itemInHand, "pipe") )
+        {
+            String titanItemID = TitanMachines.tools.getItemStackTool().getTitanItemID(itemInHand);
+            if (titanItemID == null || titanItemID.isEmpty() || titanItemID.isBlank())
+            {
+                itemInHand = TitanMachines.tools.getItemStackTool().setTitanItemID(itemInHand, "PIPE");
+                event.getPlayer().getInventory().setItem(event.getHand(), itemInHand.clone());
+                event.setCancelled(true);
+                TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Your item has been updated, please try again.");
+            }
+        }
         if (TitanMachines.itemStackTool.isContainer(itemInHand))
         {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    PipesManager.instance.scanPlacedChest(location);
+                    PipesManager.scanPlacedChest(location);
                 }
             }.runTaskLater(TitanMachines.instants, 3);
 
@@ -525,23 +489,9 @@ public class MainListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    PipesManager.instance.scanPlacedChest(location);
+                    PipesManager.scanPlacedChest(location);
                 }
             }.runTaskLater(TitanMachines.instants, 3);
-        }
-        if (nbtTool.getBoolean(itemInHand, "pipe") )
-        {
-            Location clone = location.clone();
-            PipesManager.instance.add(clone);
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    clone.getBlock().setType(Material.BARRIER);
-                    PipesManager.instance.checkSurroundings(clone);
-                }
-            }.runTaskLater(TitanMachines.instants, 1);
-
-
         }
         if (nbtTool.getBoolean(itemInHand, "trashbarrel") )
         {
@@ -549,12 +499,6 @@ public class MainListener implements Listener {
             TrashBarrelManager.instance.add(clone);
             TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Trash Barrel ready to remove blocks from the game :)");
         }
-/*        if (nbtTool.getBoolean(itemInHand, "lumberjack") )
-        {
-            Location clone = location.clone();
-            LumberjackManager.instance.add(clone);
-            TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Lumberjack read to cut down some trees :)");
-        }*/
         if (nbtTool.getBoolean(itemInHand, "blockbreaker") )
         {
             Location clone = location.clone();

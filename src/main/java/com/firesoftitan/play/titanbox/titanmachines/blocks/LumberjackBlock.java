@@ -17,8 +17,6 @@ public class LumberjackBlock  extends TitanBlock {
 
     public LumberjackBlock(String titanID, ItemStack itemStack, Location location) {
         super(titanID, itemStack, location);
-        this.saveManager.set("power", true);
-        updateBlock(this);
     }
 
     public LumberjackBlock(SaveManager saveManager) {
@@ -91,4 +89,8 @@ public class LumberjackBlock  extends TitanBlock {
         return this.saveManager.getBoolean("power");
     }
 
+    public void setup() {
+        this.saveManager.set("power", true);
+        updateBlock(this);
+    }
 }

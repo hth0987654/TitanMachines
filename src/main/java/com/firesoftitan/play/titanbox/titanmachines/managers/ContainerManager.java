@@ -159,8 +159,7 @@ public class ContainerManager {
         }
         if (location.getBlock().getState() instanceof Container container) {
             Inventory inventory = container.getInventory();
-            inventory.setItem(slot, itemStack);
-            return;
+            if (slot < inventory.getSize()) inventory.setItem(slot, itemStack);
         }
 
     }
@@ -190,7 +189,7 @@ public class ContainerManager {
         }
         if (location.getBlock().getState() instanceof Container container) {
             Inventory inventory = container.getInventory();
-            return inventory.getItem(slot);
+            if (slot < inventory.getSize()) return inventory.getItem(slot);
         }
 
         return null;

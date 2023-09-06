@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class VisualRunnable  extends BukkitRunnable {
-    private HashMap<String, Long> loadedChunks = new HashMap<String, Long>();
+    private final HashMap<String, Long> loadedChunks = new HashMap<String, Long>();
     @Override
     public void run() {
         cleanUpOldChunks();
@@ -35,26 +35,28 @@ public class VisualRunnable  extends BukkitRunnable {
                 List<Location> sortingContainers = ItemSorterManager.instance.getSortingContainers(player);
                 for(Location containerLocation: sortingContainers)
                 {
-                    if (containerLocation.distance(playerLocation) < 16)
-                    {
-                        ItemStack itemStack = ItemSorterManager.instance.getSortingItem(player, containerLocation);
-                        BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, containerLocation);
-                        int settingsSortingType = ItemSorterManager.instance.getSettingsSortingType(player, containerLocation);
-                        ContainerVisualManager manager = ContainerVisualManager.getManager(containerLocation);
-                        if (settingsSortingType > 0) {
-                            if (manager == null) {
-                                new ContainerVisualManager(containerLocation, itemStack, settingsSortingFacing);
-                            } else {
-                                if (!TitanMachines.itemStackTool.isItemEqual(manager.getItemStack(), itemStack))
-                                {
+                    if (containerLocation.getWorld() != null &&  playerLocation.getWorld() != null) {
+                        if (containerLocation.getWorld().getName().equals(playerLocation.getWorld().getName())) {
+                            if (containerLocation.distance(playerLocation) < 16) {
+                                ItemStack itemStack = ItemSorterManager.instance.getSortingItem(player, containerLocation);
+                                BlockFace settingsSortingFacing = ItemSorterManager.instance.getSettingsSortingFacing(player, containerLocation);
+                                int settingsSortingType = ItemSorterManager.instance.getSettingsSortingType(player, containerLocation);
+                                ContainerVisualManager manager = ContainerVisualManager.getManager(containerLocation);
+                                if (settingsSortingType > 0) {
+                                    if (manager == null) {
+                                        new ContainerVisualManager(containerLocation, itemStack, settingsSortingFacing);
+                                    } else {
+                                        if (!TitanMachines.itemStackTool.isItemEqual(manager.getItemStack(), itemStack)) {
+                                            ContainerVisualManager.removeManager(containerLocation);
+                                            new ContainerVisualManager(containerLocation, itemStack, settingsSortingFacing);
+                                        }
+                                        if (settingsSortingFacing != manager.getBlockFace())
+                                            manager.setBlockFace(settingsSortingFacing);
+                                    }
+                                } else if (manager != null) {
                                     ContainerVisualManager.removeManager(containerLocation);
-                                    new ContainerVisualManager(containerLocation, itemStack, settingsSortingFacing);
                                 }
-                                if (settingsSortingFacing != manager.getBlockFace())
-                                    manager.setBlockFace(settingsSortingFacing);
                             }
-                        }else if (manager != null) {
-                            ContainerVisualManager.removeManager(containerLocation);
                         }
                     }
                 }
@@ -68,26 +70,26 @@ public class VisualRunnable  extends BukkitRunnable {
         {
             String uuid = "";
             String connections = "";
-            if (PipesManager.instance.isPipe(targetBlockExact.getLocation())) {
-                uuid =  PipesManager.instance.getGroup(targetBlockExact.getLocation()) + "";
+            if (PipesManager.isPipe(targetBlockExact.getLocation())) {
+                uuid =  PipesManager.getGroup(targetBlockExact.getLocation()) + "";
             }
-            List<Location> connections1 = PipesManager.instance.getConnections(targetBlockExact.getLocation());
-            if (connections1 != null && connections1.size() > 0)
+            List<Location> connections1 = PipesManager.getConnections(targetBlockExact.getLocation());
+            if (!connections1.isEmpty())
             {
                 for(Location l: connections1)
                 {
                     connections = connections + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ":";
                 }
             }
-            if (PipesManager.instance.isChestConnected(targetBlockExact.getLocation()))
+            if (PipesManager.isChestConnected(targetBlockExact.getLocation()))
             {
-                List<UUID> uuids = PipesManager.instance.getChestGroups(targetBlockExact.getLocation());
+                List<UUID> uuids = PipesManager.getChestGroups(targetBlockExact.getLocation());
                 for(UUID uuid1:uuids)
                 {
                     connections = connections + uuid1 + "|";
                 }
             }
-            if (uuid.length() > 0 || connections.length() > 0)
+            if (!uuid.isEmpty() || !connections.isEmpty())
             {
                 player.sendTitle(uuid, connections, 1, 2, 1);
             }

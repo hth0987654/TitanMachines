@@ -6,8 +6,8 @@ public enum PipeChestFilterType {
     TOTAL_MATCH(1, "100% match"),
     MATERIAL_ONLY(2, "Material match only");
 
-    private int value;
-    private String caption;
+    private final int value;
+    private final String caption;
     PipeChestFilterType(int value, String caption) {
         this.value = value;
         this.caption = caption;

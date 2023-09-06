@@ -48,7 +48,8 @@ public class RecipeManager {
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
         ItemStack partItem = TitanMachines.instants.getPipe();
         partItem.setAmount(3);
-        tools.getRecipeTool().addAdvancedRecipe(partItem, matrix);
+        TitanBlockManager.registerTitanBlock(TitanMachines.instants, partItem, matrix);
+        //tools.getRecipeTool().addAdvancedRecipe(partItem, matrix);
 
     }
     private void addAreaHopper() {

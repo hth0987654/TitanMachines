@@ -52,6 +52,14 @@ public class LumberjackRunnable extends BukkitRunnable {
                         BlockFace facing = ((Directional) block.getBlockData()).getFacing();
                         Block base = block.getRelative(facing);
                         if (base.getType().name().contains("SAPLING") && lumberjackBlock.getSaplingMaterial() != base.getType()) lumberjackBlock.clearSapling(base.getType());
+                        if (base.getType() == Material.AIR)
+                        {
+                            if (saplingCount > 0) {
+                                base.setType(saplingMaterial);
+                                lumberjackBlock.removeSapling(saplingMaterial);
+                                saplingCount = lumberjackBlock.getSaplingCount();
+                            }
+                        }
                         if (isBlockBreakable(base)) {
                             World world = base.getWorld();
                             int cap = 1;
@@ -64,11 +72,13 @@ public class LumberjackRunnable extends BukkitRunnable {
                                             Collection<ItemStack> drops = relative.getDrops();
                                             if (y == 0)
                                             {
-                                                if (saplingCount > 0) {
-                                                    relative.setType(saplingMaterial);
-                                                    lumberjackBlock.removeSapling(saplingMaterial);
+                                                if (relative.getType().name().contains("WOOD") || relative.getType().name().contains("LOG")) {
+                                                    if (saplingCount > 0) {
+                                                        relative.setType(saplingMaterial);
+                                                        lumberjackBlock.removeSapling(saplingMaterial);
+                                                        saplingCount = lumberjackBlock.getSaplingCount();
+                                                    } else relative.setType(Material.AIR);
                                                 }
-                                                else relative.setType(Material.AIR);
                                             }
                                             else relative.setType(Material.AIR);
                                             for (ItemStack itemStack : drops) {

@@ -15,7 +15,7 @@ public class SaveRunnable extends TitanSaverRunnable {
         AreaHopperManager.save();
         ChunkHopperManager.save();
         ItemSorterManager.instance.save();
-        PipesManager.instance.save();
+        PipesManager.save();
         BlockBreakerManager.instance.save();
         TrashBarrelManager.instance.save();
     }

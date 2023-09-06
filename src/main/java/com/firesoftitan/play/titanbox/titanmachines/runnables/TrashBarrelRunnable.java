@@ -18,11 +18,11 @@ public class TrashBarrelRunnable extends BukkitRunnable {
     @Override
     public void run() {
         TrashBarrelManager manager = TrashBarrelManager.instance;
-        if (quList.size() == 0) quList = manager.getKeys();
+        if (quList.isEmpty()) quList = manager.getKeys();
         List<String> runningKeys = new ArrayList<String>();
         for(int i = 0;i<10; i++)
         {
-            if (quList.size() > 0) {
+            if (!quList.isEmpty()) {
                 runningKeys.add(quList.get(0));
                 quList.remove(0);
             }
@@ -35,7 +35,7 @@ public class TrashBarrelRunnable extends BukkitRunnable {
                     if (block.getType() == Material.BARREL) {
                         Barrel chest = ((Barrel) block.getState());
                         Inventory inventory = chest.getInventory();
-                        if (inventory.getViewers().size() == 0) inventory.clear();
+                        if (inventory.getViewers().isEmpty()) inventory.clear();
                     }
                 }
             }

@@ -6,6 +6,7 @@ import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
@@ -29,9 +30,9 @@ public class PipeSubRunnable extends BukkitRunnable {
         this.uuid = uuid;
         this.parent = parent;
         this.done = false;
-        OutChestsInGroup = PipesManager.instance.getOutChestsInGroup(uuid);
-        InChestsInGroup = PipesManager.instance.getInChestsInGroup(uuid);
-        OverflowInGroup = PipesManager.instance.getOverflowInGroup(uuid);
+        OutChestsInGroup = PipesManager.getOutChestsInGroup(uuid);
+        InChestsInGroup = PipesManager.getInChestsInGroup(uuid);
+        OverflowInGroup = PipesManager.getOverflowInGroup(uuid);
         createdTime = System.currentTimeMillis();
 
     }
@@ -60,7 +61,7 @@ public class PipeSubRunnable extends BukkitRunnable {
         long startTIme = System.currentTimeMillis();
 
         Location chestOut = OutChestsInGroup.get(0).clone();
-        Location chestIn = null;
+        Location chestIn;
         Location overFlow = null;
         if (InChestsInGroup.isEmpty())
         {
@@ -76,10 +77,10 @@ public class PipeSubRunnable extends BukkitRunnable {
                 }
                 if (overflow)
                 {
-                    List<Integer> chestSettingsFilterAccessSlots = PipesManager.instance.getChestSettingsFilterAccessSlots(overFlow, uuid);
+                    List<Integer> chestSettingsFilterAccessSlots = PipesManager.getChestSettingsFilterAccessSlots(overFlow, uuid);
                     for (int k : chestSettingsFilterAccessSlots) {
-                        ItemStack InChestSettingsFilter = PipesManager.instance.getChestSettingsFilter(overFlow, uuid, k);
-                        PipeChestFilterType InChestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(overFlow, uuid, k);
+                        ItemStack InChestSettingsFilter = PipesManager.getChestSettingsFilter(overFlow, uuid, k);
+                        PipeChestFilterType InChestSettingsFilterType = PipesManager.getChestSettingsFilterType(overFlow, uuid, k);
                         scanChest(uuid, k, chestOut, overFlow, InChestSettingsFilterType, InChestSettingsFilter); //only overflow stacks of 64
                     }
                 }
@@ -87,23 +88,23 @@ public class PipeSubRunnable extends BukkitRunnable {
             if (overFlow == null || OverflowInGroup.isEmpty()) {
                 overflow = false;
                 OutChestsInGroup.remove(0);
-                InChestsInGroup = PipesManager.instance.getInChestsInGroup(uuid);
-                OverflowInGroup = PipesManager.instance.getOverflowInGroup(uuid);
+                InChestsInGroup = PipesManager.getInChestsInGroup(uuid);
+                OverflowInGroup = PipesManager.getOverflowInGroup(uuid);
             }
         }
         else {
             chestIn = InChestsInGroup.get(0).clone();
             InChestsInGroup.remove(0);
 
-            List<Integer> chestSettingsFilterAccessSlots = PipesManager.instance.getChestSettingsFilterAccessSlots(chestIn, uuid);
+            List<Integer> chestSettingsFilterAccessSlots = PipesManager.getChestSettingsFilterAccessSlots(chestIn, uuid);
             for (int k : chestSettingsFilterAccessSlots) {
-                ItemStack InChestSettingsFilter = PipesManager.instance.getChestSettingsFilter(chestIn, uuid, k);
-                PipeChestFilterType InChestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(chestIn, uuid, k);
+                ItemStack InChestSettingsFilter = PipesManager.getChestSettingsFilter(chestIn, uuid, k);
+                PipeChestFilterType InChestSettingsFilterType = PipesManager.getChestSettingsFilterType(chestIn, uuid, k);
                 scanChest(uuid, k, chestOut, chestIn, InChestSettingsFilterType, InChestSettingsFilter);
             }
         }
         long doneTime = System.currentTimeMillis() - startTIme;
-        if (doneTime > 500)
+        if (doneTime > 1000)
             TitanMachines.messageTool.sendMessageSystem("Pipe sub task took to long uuid:" + uuid + ":" + doneTime + " ms");
 
     }
@@ -111,26 +112,26 @@ public class PipeSubRunnable extends BukkitRunnable {
     {
         for(int i: ContainerManager.getInventorySlots(uuid, chestOut))
         {
-            PipeChestFilterType OutChestSettingsFilterType = PipesManager.instance.getChestSettingsFilterType(chestOut, group, i);
+            PipeChestFilterType OutChestSettingsFilterType = PipesManager.getChestSettingsFilterType(chestOut, group, i);
             if (OutChestSettingsFilterType == PipeChestFilterType.ALL) {
                 ItemStack item = ContainerManager.getInventorySlot(uuid, chestOut, i);
-
-                if (!TitanMachines.itemStackTool.isEmpty(item)) {
-
+                if (!TitanMachines.itemStackTool.isEmpty(item))
+                {
                     if (chestInFilterType == PipeChestFilterType.ALL) {
-                        item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
+                        item = checkSort(slot, chestIn, item); //place in the chest
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);//send back leftovers
                         return;
                     } else if (chestInFilterType == PipeChestFilterType.MATERIAL_ONLY &&
                             item.getType() == chestInFilterItem.getType()) {
-                        item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
+                        item = checkSort(slot, chestIn, item);//place in the chest
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);//send back leftovers
                         return;
                     } else if (chestInFilterType == PipeChestFilterType.TOTAL_MATCH &&
                             TitanMachines.itemStackTool.isItemEqual(item, chestInFilterItem)) {
-                        item = checkSort(slot, chestIn, item);
-                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);
+                        item = checkSort(slot, chestIn, item);//place in the chest
+                        ContainerManager.setInventorySlot(uuid, chestOut, item, i);//send back leftovers
                         return;
+
                     }
 
                 }

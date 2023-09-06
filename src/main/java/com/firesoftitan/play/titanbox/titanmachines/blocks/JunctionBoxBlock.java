@@ -86,7 +86,12 @@ public class JunctionBoxBlock extends TitanBlock {
                 it.remove();
             } else {
                 // First time seeing this name - add it
-                seenNames.add(name);
+                if (getFilterType(blockFace, item) != PipeChestFilterType.DISABLED)
+                {
+                    System.out.println(name + ":" + getFilterType(blockFace, item));
+                    seenNames.add(name);
+                }
+                else it.remove();
             }
         }
         List<ItemStack> filteredItems = new ArrayList<>(filter);
@@ -146,8 +151,8 @@ public class JunctionBoxBlock extends TitanBlock {
         for (BlockFace blockFace: blockFaces) {
 
             Location pipe = location.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
-            if (PipesManager.instance.isPipe(pipe)) {
-                UUID group = PipesManager.instance.getGroup(pipe);
+            if (PipesManager.isPipe(pipe)) {
+                UUID group = PipesManager.getGroup(pipe);
                 if (group.equals(uuid)) return pipe;
             }
         }

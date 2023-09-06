@@ -6,8 +6,8 @@ public enum PipeChestType {
     CHEST_OUT(2, "Pull out off chest"),
     OVERFLOW(3, "Overflow Chest");
 
-    private int value;
-    private String caption;
+    private final int value;
+    private final String caption;
     PipeChestType(int value, String caption) {
         this.value = value;
         this.caption = caption;

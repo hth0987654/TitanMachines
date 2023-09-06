@@ -49,6 +49,9 @@ public class TabCompleteListener implements TabCompleter {
                 commands.add("sorter");
                 commands.add("chunkhopper");
                 commands.add("areahopper");
+                commands.add("junctionbox");
+
+
             }
 
         }

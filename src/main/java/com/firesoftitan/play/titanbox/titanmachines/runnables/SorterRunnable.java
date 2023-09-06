@@ -70,7 +70,6 @@ public class SorterRunnable extends BukkitRunnable {
             {
                 goingTo = ((Container) relative.getState()).getInventory();
                 locationsEqual = TitanMachines.tools.getLocationTool().isLocationsEqual(goingTo.getLocation(), location);
-                if (locationsEqual) System.out.println(locationsEqual);
             }
             if (!isPowered(block) && !locationsEqual) {
                 Inventory inventory = hopper.getInventory();

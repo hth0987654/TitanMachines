@@ -6,6 +6,8 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -91,13 +93,14 @@ public class ContainerVisualManager {
         Location check = container.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
         Location fixedCheck = ItemSorterManager.getFixContainerLocation(check);
         Location fixedClone = ItemSorterManager.getFixContainerLocation(clone);
-        if (TitanMachines.locationTool.isLocationsEqual(fixedCheck, fixedClone))
-        {
-            blockFace = BlockFace.NORTH;
-        }
 
         float yaw = yawAngleMap.get(blockFace);
         Location displayLoc = getOffset(blockFace, clone);
+        //Check to see if it's a double-chest
+        if (TitanMachines.locationTool.isLocationsEqual(fixedCheck, fixedClone))
+        {
+            displayLoc.add(blockFace.getModX() , blockFace.getModY() , blockFace.getModZ() );
+        }
         if (hologramManager == null) {
             hologramManager = TitanMachines.hologramTool.addHologram(displayLoc.clone().add(0,200, 0));
         }

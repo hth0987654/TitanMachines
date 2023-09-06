@@ -39,8 +39,8 @@ public class AdvancedPipeGUI {
         this.location = location.clone();
         this.chest = chest.clone();
         this.player = player;
-        this.group = PipesManager.instance.getGroup(this.location);
-        this.connections = PipesManager.instance.getConnections(this.location);
+        this.group = PipesManager.getGroup(this.location);
+        this.connections = PipesManager.getConnections(this.location);
         this.inventory = Bukkit.createInventory(null, size, AdvancedPipeGUI.name);
     }
     public Location getLocation() {
@@ -65,6 +65,12 @@ public class AdvancedPipeGUI {
     public boolean render()
     {
         BlockState state = chest.getBlock().getState();
+        int getter = -1;
+        SelectorGUI s = select.get(player.getUniqueId());
+        if (s != null)
+        {
+            getter = s.getGetter();
+        }
         if (SlimefunSupport.instance.isSupported(chest)) {
             Set<Integer> gui = SlimefunSupport.instance.getPresetSlots(chest);
             Set<Integer> inv = SlimefunSupport.instance.getInventorySlots(chest);
@@ -77,31 +83,41 @@ public class AdvancedPipeGUI {
             ItemStack item = new ItemStack(Material.BARRIER);
             for (int slot: ContainerManager.getInventorySlots(getLocation(), chest))
             {
-                PipeChestFilterType type = PipesManager.instance.getChestSettingsFilterType(chest, group, slot);
-                ItemStack chestSettingsFilter = PipesManager.instance.getChestSettingsFilter(chest, group, slot);
+                PipeChestFilterType type = PipesManager.getChestSettingsFilterType(chest, group, slot);
+                ItemStack chestSettingsFilter = PipesManager.getChestSettingsFilter(chest, group, slot);
                 if (TitanMachines.itemStackTool.isEmpty(chestSettingsFilter)) {
                     chestSettingsFilter = new ItemStack(Material.DIRT);
-                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Press Scan Book, to set item.");
+                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Press Scan Book, to set item.");
 
                 }
                 if (type == PipeChestFilterType.DISABLED) {
                     item = new ItemStack(Material.BARRIER);
-                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Click to change");
-                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.DARK_PURPLE + "Click to Change");
+                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Left Click to change");
                 }
                 if (type == PipeChestFilterType.ALL) {
                     item = new ItemStack(Material.NETHER_STAR);
-                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Click to change");
-                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "For more options place, item(s)", ChatColor.WHITE + "then press scan button bellow.", ChatColor.DARK_PURPLE + "Click to Change");
+                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Left Click to change");
                 }
                 if (type == PipeChestFilterType.TOTAL_MATCH) {
                     item = chestSettingsFilter;
+                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "" + ChatColor.UNDERLINE + "-----------------");
                 }
                 if (type == PipeChestFilterType.MATERIAL_ONLY) {
                     item = new ItemStack(chestSettingsFilter.getType());
-                }
 
-                item = TitanMachines.itemStackTool.addLore(item, ChatColor.GRAY + "---------------------", ChatColor.GRAY + "Filter: " + ChatColor.YELLOW + type.getCaption(), ChatColor.DARK_PURPLE + "Click to Change");
+                }
+                if (getter == slot)
+                {
+                    item = new ItemStack(Material.CLOCK);
+                    if (s.getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY) item = new ItemStack(Material.COMPASS);
+                    item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Click Item To set");
+                    PipeChestFilterType pipeChestFilterType = s.getPipeChestFilterType();
+                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + "Type: " + ChatColor.GREEN + pipeChestFilterType.getCaption(), ChatColor.WHITE + "Click Item in your inventory, now!", ChatColor.WHITE + "Right Click here to change type", ChatColor.WHITE + "Left Click to cancel");
+                }
+                else {
+                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + "Filter: " + ChatColor.GREEN + type.getCaption(), ChatColor.WHITE + "Left Click to Change");
+                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Right Click to set Item from your Inventory");
+                }
                 item = TitanMachines.nbtTool.set(item, "button", 1);
                 item = TitanMachines.nbtTool.set(item, "location", this.location);
                 item = TitanMachines.nbtTool.set(item, "connection", this.chest);
@@ -135,26 +151,21 @@ public class AdvancedPipeGUI {
             {
                 this.inventory = Bukkit.createInventory(null, defaultSize, AdvancedPipeGUI.name);
             }
-            int getter = -1;
-            SelectorGUI s = select.get(player.getUniqueId());
-            if (s != null)
-            {
-                getter = s.getGetter();
-            }
+
             for (int i = 0; i < inventory.getSize(); i++)
             {
                 ItemStack item = new ItemStack(Material.BARRIER);
                 if (i < containerInventory.getSize())
                 {
-                    PipeChestFilterType type = PipesManager.instance.getChestSettingsFilterType(chest, group, i);
-                    ItemStack chestSettingsFilter = PipesManager.instance.getChestSettingsFilter(chest, group, i);
+                    PipeChestFilterType type = PipesManager.getChestSettingsFilterType(chest, group, i);
+                    ItemStack chestSettingsFilter = PipesManager.getChestSettingsFilter(chest, group, i);
                     if (TitanMachines.itemStackTool.isEmpty(chestSettingsFilter) || type == PipeChestFilterType.DISABLED) {
                         item = new ItemStack(Material.BARRIER);
-                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Click to change");
+                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Left Click to Change");
                     }
                     if (type == PipeChestFilterType.ALL) {
                         item = new ItemStack(Material.NETHER_STAR);
-                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Click to change");
+                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Left Click to Change");
                     }
                     if (type == PipeChestFilterType.TOTAL_MATCH) {
                         item = chestSettingsFilter;
@@ -167,13 +178,14 @@ public class AdvancedPipeGUI {
                     {
                         item = new ItemStack(Material.CLOCK);
                         if (s.getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY) item = new ItemStack(Material.COMPASS);
-                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.GRAY + "Click Item To set");
+                        item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Click Item To set");
                         PipeChestFilterType pipeChestFilterType = s.getPipeChestFilterType();
-                        item = TitanMachines.itemStackTool.addLore(item, ChatColor.AQUA + "Type: " + ChatColor.GOLD + pipeChestFilterType.getCaption(), ChatColor.GRAY + "Click Item in your inventory, now!", ChatColor.GRAY + "Right Click here to change type", ChatColor.GRAY + "Left Click to cancel");
+                        item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + "Type: " + ChatColor.GREEN + pipeChestFilterType.getCaption(), ChatColor.WHITE + "Click Item in your inventory, now!", ChatColor.WHITE + "Right Click here to change type", ChatColor.WHITE + "Left Click to cancel");
                     }
-
-                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.GRAY + "Filter: " + ChatColor.YELLOW + type.getCaption(), ChatColor.DARK_PURPLE + "Click to Change");
-                    item = TitanMachines.itemStackTool.addLore(item, ChatColor.GRAY + "---------------------", ChatColor.AQUA + "Click to set Item from your Inventory");
+                    else {
+                        item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + "Filter: " + ChatColor.GREEN + type.getCaption());
+                        item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Right Click to set Item from your Inventory");
+                    }
                     item = TitanMachines.nbtTool.set(item, "button", 1);
                     item = TitanMachines.nbtTool.set(item, "location", this.location);
                     item = TitanMachines.nbtTool.set(item, "connection", this.chest);
@@ -210,8 +222,8 @@ public class AdvancedPipeGUI {
 
                 PipeChestFilterType totalMatch = PipeChestFilterType.TOTAL_MATCH;
                 if (s.getGetter() > 1) totalMatch = PipeChestFilterType.MATERIAL_ONLY;
-                PipesManager.instance.setChestSettingsFilterType(s.getConnection(), s.getGroup(), s.getGetter(), totalMatch);
-                PipesManager.instance.setChestSettingsFilter(s.getConnection(), s.getGroup(), s.getGetter(), filter);
+                PipesManager.setChestSettingsFilterType(s.getConnection(), s.getGroup(), s.getGetter(), totalMatch);
+                PipesManager.setChestSettingsFilter(s.getConnection(), s.getGroup(), s.getGetter(), filter);
                 select.remove(player.getUniqueId());
             }
 
@@ -224,8 +236,8 @@ public class AdvancedPipeGUI {
         SelectorGUI s = select.get(player.getUniqueId());
         if (button == 1 && (s == null || s.getGetter() != slot))
         {
-            ItemStack itemStack = PipesManager.instance.getChestSettingsFilter(connection, group, slot);
-            PipeChestFilterType chestSettingsType = PipesManager.instance.getChestSettingsFilterType(connection, group, slot);
+            ItemStack itemStack = PipesManager.getChestSettingsFilter(connection, group, slot);
+            PipeChestFilterType chestSettingsType = PipesManager.getChestSettingsFilterType(connection, group, slot);
             PipeChestFilterType nextSetting = PipeChestFilterType.getPipeChestType(chestSettingsType.getValue() + 1);
             if (TitanMachines.itemStackTool.isEmpty(itemStack) )
             {
@@ -234,7 +246,7 @@ public class AdvancedPipeGUI {
                     nextSetting = PipeChestFilterType.DISABLED;
                 }
             }
-            PipesManager.instance.setChestSettingsFilterType(connection, group, slot, nextSetting);
+            PipesManager.setChestSettingsFilterType(connection, group, slot, nextSetting);
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, location, connection);
             advancedPipeGUI.open();
 

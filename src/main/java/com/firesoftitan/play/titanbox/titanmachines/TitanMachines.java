@@ -4,7 +4,7 @@ import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TabCompleteListener;
-import com.firesoftitan.play.titanbox.titanmachines.listeners.TitanBlockListener;
+import com.firesoftitan.play.titanbox.titanmachines.listeners.TitanMachineBlockListener;
 import com.firesoftitan.play.titanbox.titanmachines.loaders.ConfigLoader;
 import com.firesoftitan.play.titanbox.titanmachines.managers.*;
 import com.firesoftitan.play.titanbox.titanmachines.runnables.*;
@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -60,14 +61,13 @@ public final class TitanMachines extends JavaPlugin {
         mainListener = new MainListener(this);
         mainListener.registerEvents();
         configLoader = new ConfigLoader();
-        TitanBlockManager.registerListener(this, new TitanBlockListener());
+        TitanBlockManager.registerListener(this, new TitanMachineBlockListener());
 
         visualTask = new VisualRunnable();
         visualTask.runTaskTimer(this, 10, 10);
         new RecipeManager();
         new BlockBreakerManager();
         new ItemSorterManager();
-        new PipesManager();
         new TrashBarrelManager();
 
 
@@ -81,6 +81,12 @@ public final class TitanMachines extends JavaPlugin {
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
         Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
+/*        new BukkitRunnable() {
+            @Override
+            public void run() {
+                PipesManager.rescanAllPipes();
+            }
+        }.runTaskLater(this,10);*/
 
     }
 
@@ -147,6 +153,17 @@ public final class TitanMachines extends JavaPlugin {
                                 Player player = Bukkit.getPlayer(args[1]);
 
                                 ItemStack itemStack = getTrashBarrel();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("junctionbox")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getJunctionBox();
                                 itemStack.setAmount(amount);
                                 player.getInventory().addItem(itemStack.clone());
                                 return true;
@@ -237,11 +254,10 @@ public final class TitanMachines extends JavaPlugin {
         itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Pipe");
         itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Send items threw the pipe");
         itemStack = nbtTool.set(itemStack, "pipe", true);
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "PIPE");
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setCustomModelData(modelNumber);
-        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "PIPE");
         itemStack.setItemMeta(itemMeta);
-
         itemStack.setAmount(1);
         return itemStack;
     }

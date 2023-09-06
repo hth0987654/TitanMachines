@@ -13,11 +13,11 @@ public class PipeRunnable extends BukkitRunnable {
     private long pausedTime;
     public PipeRunnable() {
         que_Process = new ArrayList<UUID>();
-        int min = Math.min(PipesManager.instance.getGroups().size(), 20);
+        int min = Math.min(PipesManager.getGroups().size(), 20);
         if (min < 1) min = 1;
         pipeSubRunnable = new PipeSubRunnable[min];
         index = pipeSubRunnable.length;
-        que_Process.addAll(PipesManager.instance.getGroups());
+        que_Process.addAll(PipesManager.getGroups());
         pausedTime = System.currentTimeMillis();
     }
 
@@ -27,7 +27,7 @@ public class PipeRunnable extends BukkitRunnable {
 
         if (!TitanMachines.pipedEnabled) return;
         index++;
-        List<UUID> groups = PipesManager.instance.getGroups();
+        List<UUID> groups = PipesManager.getGroups();
         int min = Math.min(pipeSubRunnable.length, groups.size());
         if (min == 0) return;
         if (index >= min) index = 0;
