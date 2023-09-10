@@ -5,6 +5,7 @@ import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
@@ -35,12 +36,12 @@ public class AdvancedPipeGUI {
     private final List<Location> connections;
     private final Player player;
 
-    public AdvancedPipeGUI( Player player, Location location, Location chest) {
+    public AdvancedPipeGUI(Player player, Location location, Location chest) {
         this.location = location.clone();
         this.chest = chest.clone();
         this.player = player;
-        this.group = PipesManager.getGroup(this.location);
-        this.connections = PipesManager.getConnections(this.location);
+        this.group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(this.location);
+        this.connections = PipesManager.getInstant(PipeTypeEnum.COPPER).getConnections(this.location);
         this.inventory = Bukkit.createInventory(null, size, AdvancedPipeGUI.name);
     }
     public Location getLocation() {
@@ -83,8 +84,8 @@ public class AdvancedPipeGUI {
             ItemStack item = new ItemStack(Material.BARRIER);
             for (int slot: ContainerManager.getInventorySlots(getLocation(), chest))
             {
-                PipeChestFilterType type = PipesManager.getChestSettingsFilterType(chest, group, slot);
-                ItemStack chestSettingsFilter = PipesManager.getChestSettingsFilter(chest, group, slot);
+                PipeChestFilterType type = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilterType(chest, group, slot);
+                ItemStack chestSettingsFilter = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilter(chest, group, slot);
                 if (TitanMachines.itemStackTool.isEmpty(chestSettingsFilter)) {
                     chestSettingsFilter = new ItemStack(Material.DIRT);
                     item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Press Scan Book, to set item.");
@@ -157,8 +158,8 @@ public class AdvancedPipeGUI {
                 ItemStack item = new ItemStack(Material.BARRIER);
                 if (i < containerInventory.getSize())
                 {
-                    PipeChestFilterType type = PipesManager.getChestSettingsFilterType(chest, group, i);
-                    ItemStack chestSettingsFilter = PipesManager.getChestSettingsFilter(chest, group, i);
+                    PipeChestFilterType type = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilterType(chest, group, i);
+                    ItemStack chestSettingsFilter = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilter(chest, group, i);
                     if (TitanMachines.itemStackTool.isEmpty(chestSettingsFilter) || type == PipeChestFilterType.DISABLED) {
                         item = new ItemStack(Material.BARRIER);
                         item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Left Click to Change");
@@ -222,8 +223,8 @@ public class AdvancedPipeGUI {
 
                 PipeChestFilterType totalMatch = PipeChestFilterType.TOTAL_MATCH;
                 if (s.getGetter() > 1) totalMatch = PipeChestFilterType.MATERIAL_ONLY;
-                PipesManager.setChestSettingsFilterType(s.getConnection(), s.getGroup(), s.getGetter(), totalMatch);
-                PipesManager.setChestSettingsFilter(s.getConnection(), s.getGroup(), s.getGetter(), filter);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(s.getConnection(), s.getGroup(), s.getGetter(), totalMatch);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilter(s.getConnection(), s.getGroup(), s.getGetter(), filter);
                 select.remove(player.getUniqueId());
             }
 
@@ -236,8 +237,8 @@ public class AdvancedPipeGUI {
         SelectorGUI s = select.get(player.getUniqueId());
         if (button == 1 && (s == null || s.getGetter() != slot))
         {
-            ItemStack itemStack = PipesManager.getChestSettingsFilter(connection, group, slot);
-            PipeChestFilterType chestSettingsType = PipesManager.getChestSettingsFilterType(connection, group, slot);
+            ItemStack itemStack = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilter(connection, group, slot);
+            PipeChestFilterType chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilterType(connection, group, slot);
             PipeChestFilterType nextSetting = PipeChestFilterType.getPipeChestType(chestSettingsType.getValue() + 1);
             if (TitanMachines.itemStackTool.isEmpty(itemStack) )
             {
@@ -246,7 +247,7 @@ public class AdvancedPipeGUI {
                     nextSetting = PipeChestFilterType.DISABLED;
                 }
             }
-            PipesManager.setChestSettingsFilterType(connection, group, slot, nextSetting);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(connection, group, slot, nextSetting);
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, location, connection);
             advancedPipeGUI.open();
 

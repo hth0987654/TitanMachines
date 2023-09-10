@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerVisualManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
@@ -70,10 +71,10 @@ public class VisualRunnable  extends BukkitRunnable {
         {
             String uuid = "";
             String connections = "";
-            if (PipesManager.isPipe(targetBlockExact.getLocation())) {
-                uuid =  PipesManager.getGroup(targetBlockExact.getLocation()) + "";
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(targetBlockExact.getLocation())) {
+                uuid =  PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(targetBlockExact.getLocation()) + "";
             }
-            List<Location> connections1 = PipesManager.getConnections(targetBlockExact.getLocation());
+            List<Location> connections1 = PipesManager.getInstant(PipeTypeEnum.COPPER).getConnections(targetBlockExact.getLocation());
             if (!connections1.isEmpty())
             {
                 for(Location l: connections1)
@@ -81,9 +82,9 @@ public class VisualRunnable  extends BukkitRunnable {
                     connections = connections + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ() + ":";
                 }
             }
-            if (PipesManager.isChestConnected(targetBlockExact.getLocation()))
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(targetBlockExact.getLocation()))
             {
-                List<UUID> uuids = PipesManager.getChestGroups(targetBlockExact.getLocation());
+                List<UUID> uuids = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestGroups(targetBlockExact.getLocation());
                 for(UUID uuid1:uuids)
                 {
                     connections = connections + uuid1 + "|";

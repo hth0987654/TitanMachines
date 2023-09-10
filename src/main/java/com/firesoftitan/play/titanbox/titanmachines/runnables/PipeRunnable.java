@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -13,21 +14,21 @@ public class PipeRunnable extends BukkitRunnable {
     private long pausedTime;
     public PipeRunnable() {
         que_Process = new ArrayList<UUID>();
-        int min = Math.min(PipesManager.getGroups().size(), 20);
+        int min = Math.min(PipesManager.getInstant(PipeTypeEnum.COPPER).getGroups().size(), 20);
         if (min < 1) min = 1;
         pipeSubRunnable = new PipeSubRunnable[min];
         index = pipeSubRunnable.length;
-        que_Process.addAll(PipesManager.getGroups());
+        que_Process.addAll(PipesManager.getInstant(PipeTypeEnum.COPPER).getGroups());
         pausedTime = System.currentTimeMillis();
     }
 
     @Override
     public void run() {
-        if (System.currentTimeMillis() - pausedTime < 500) return;
+        //if (System.currentTimeMillis() - pausedTime < 500) return;
 
         if (!TitanMachines.pipedEnabled) return;
         index++;
-        List<UUID> groups = PipesManager.getGroups();
+        List<UUID> groups = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroups();
         int min = Math.min(pipeSubRunnable.length, groups.size());
         if (min == 0) return;
         if (index >= min) index = 0;
@@ -46,7 +47,7 @@ public class PipeRunnable extends BukkitRunnable {
             pipeSubRunnable[index] = new PipeSubRunnable(uuid, this);
             pipeSubRunnable[index].runTaskTimer(TitanMachines.instants, 10, 10);
             long doneTime = System.currentTimeMillis() - startTIme;
-            if (doneTime > 1000) TitanMachines.messageTool.sendMessageSystem("Pipe main task took to long uuid:" + uuid + ":" + doneTime + " ms");
+            if (doneTime > 200) TitanMachines.messageTool.sendMessageSystem("Pipe main task took to long uuid:" + uuid + ":" + doneTime + " ms");
         }
     }
 }

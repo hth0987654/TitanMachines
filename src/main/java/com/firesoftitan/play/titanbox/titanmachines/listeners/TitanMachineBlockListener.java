@@ -8,6 +8,7 @@ import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.PipeBlock;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
@@ -29,26 +30,26 @@ public class TitanMachineBlockListener extends TitanBlockListener {
         ItemStack itemStack = event.item();
         if (titanBlock.getTitanID().equals(PipeBlock.titanID))
         {
-            PipesManager.rescanPipeOrientation(location);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).rescanPipeOrientation(location);
             if (action == Action.LEFT_CLICK_BLOCK && !TitanMachines.itemStackTool.isEmpty(itemStack))
             {
                 if (itemStack.getType() == Material.DIAMOND_PICKAXE || itemStack.getType() == Material.NETHERITE_PICKAXE
                         || itemStack.getType() == Material.GOLDEN_PICKAXE  || itemStack.getType() == Material.IRON_PICKAXE
                         || itemStack.getType() == Material.STONE_PICKAXE  || itemStack.getType() == Material.WOODEN_PICKAXE)
                 {
-                    PipesManager.remove(location);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).remove(location);
                     TitanBlock.breakBlock(titanBlock);
 
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            PipesManager.checkSurroundings(location);
+                            PipesManager.getInstant(PipeTypeEnum.COPPER).checkSurroundings(location);
                         }
                     }.runTaskLater(TitanMachines.instants, 1);
                 }
             }
             if (action == Action.RIGHT_CLICK_BLOCK) {
-                if (PipesManager.isPipe(location))
+                if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
                 {
                     PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, location);
                     pipeConnectionGUI.open();
@@ -110,12 +111,12 @@ public class TitanMachineBlockListener extends TitanBlockListener {
         {
             PipeBlock pipeBlock = PipeBlock.convert(titanBlock);
             if (pipeBlock != null) pipeBlock.setup();
-            PipesManager.add(location);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).add(location);
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     location.getBlock().setType(Material.BARRIER);
-                    PipesManager.checkSurroundings(location);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).checkSurroundings(location);
                 }
             }.runTaskLater(TitanMachines.instants, 1);
         }

@@ -1,11 +1,10 @@
 package com.firesoftitan.play.titanbox.titanmachines.listeners;
 
-import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
-import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.LibsItemStackTool;
 import com.firesoftitan.play.titanbox.libs.tools.LibsNBTTool;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import com.firesoftitan.play.titanbox.titanmachines.blocks.PipeBlock;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.AdvancedPipeGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
@@ -13,11 +12,14 @@ import com.firesoftitan.play.titanbox.titanmachines.guis.SorterGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.*;
 import com.firesoftitan.play.titanbox.titanmachines.runnables.PickUpItemRunnable;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
+import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
@@ -30,6 +32,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -102,43 +105,36 @@ public class MainListener implements Listener {
             return null;
         }
     }
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onItemSpawnEvent(ItemSpawnEvent event)
+    {
 
+    }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntitySpawnEvent(EntitySpawnEvent event)
     {
         if (event.getEntityType() == EntityType.DROPPED_ITEM)
         {
             Location location = event.getLocation();
+            Location hoppersLocation;
             if (ChunkHopperManager.hasHopper(location)) {
                 String key = ChunkHopperManager.getKey(location);
-                Location hoppersLocation = ChunkHopperManager.getLocation(key);
-                if (hoppersLocation.getChunk().isLoaded()) {
-                    Block block = hoppersLocation.getBlock();
-                    if (block.getType() != Material.HOPPER) {
-                        block.setType(Material.HOPPER);
-                    }
-                    if (!isPowered(block)) {
-                        Entity e = event.getEntity();
-                        if (!e.isDead()) {
-                            new PickUpItemRunnable(block, e).runTaskTimer(TitanMachines.instants, 1, 20);
-                        }
-                    }
-                }
+                hoppersLocation = ChunkHopperManager.getLocation(key);
             }
-            String key = AreaHopperManager.getHopperKey(location);
-            if (key != null) {
-                Location hoppersLocation = AreaHopperManager.getLocation(key);
-                if (hoppersLocation.getChunk().isLoaded()) {
-                    Block block = hoppersLocation.getBlock();
-                    if (block.getType() != Material.HOPPER) {
-                        block.setType(Material.HOPPER);
-                    }
-                    if (!isPowered(block)) {
-                        Entity e = event.getEntity();
-                        if (!e.isDead()) {
-                            new PickUpItemRunnable(block, e).runTaskTimer(TitanMachines.instants, 1, 20);
-                        }
-                    }
+            else {
+                String key = AreaHopperManager.getHopperKey(location);
+                if (key == null) return;
+                hoppersLocation = AreaHopperManager.getLocation(key);
+            }
+            Block block = hoppersLocation.getBlock();
+            if (block.getType() != Material.HOPPER) {
+                block.setType(Material.HOPPER);
+            }
+            if (!isPowered(block)) {
+                Entity e = event.getEntity();
+                if (!e.isDead()) {
+                    e.teleport(block.getLocation().clone().add(0, 1, 0));
+                    new PickUpItemRunnable(block, e).runTaskTimer(TitanMachines.instants, 1, 20);
                 }
             }
         }
@@ -148,38 +144,7 @@ public class MainListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onInventoryCloseEvent(InventoryCloseEvent event) {
-/*        Inventory inventory = event.getInventory();
-        Location location = inventory.getLocation();
-        HumanEntity player = event.getPlayer();
-        if (location != null)
-        {
-            if (ItemSorterManager.instance.hasSorter((Player) player))
-            {
-                ItemStack sortingItem = ItemSorterManager.instance.getSortingItem((Player) player, location);
-                if (itemStackTool.isEmpty(sortingItem))
-                {
-                    if (ItemSorterManager.isSortingContainer(location)) {
-                        ItemStack added = ItemSorterManager.instance.addChest((Player)player, location, inventory);
-                        if (!TitanMachines.itemStackTool.isEmpty(added)) {
-                            if (!ItemSorterManager.instance.getSettingsSortingLock((Player)player, location)) {
-                                ItemSorterManager.instance.setSettingsSortingFacing((Player)player, location, player.getFacing().getOppositeFace());
-                                ItemSorterManager.instance.setSettingsSortingLock((Player)player, location);
-                            }
 
-                            String name = TitanMachines.itemStackTool.getName(added);
-                            TitanMachines.messageTool.sendMessagePlayer((Player) player, "Chest added to Sorting Hopper, Item: " + ChatColor.WHITE + name);
-                        }
-                    }
-                }
-                else
-                {
-                    if (!ItemSorterManager.instance.getSettingsSortingLock((Player)player, location)) {
-                        ItemSorterManager.instance.setSettingsSortingFacing((Player)player, location, player.getFacing().getOppositeFace());
-                        ItemSorterManager.instance.setSettingsSortingLock((Player)player, location);
-                    }
-                }
-            }
-        }*/
 
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -300,6 +265,7 @@ public class MainListener implements Listener {
         if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && player.isSneaking()) {
             if (clickedBlock != null) {
                 if (SensibleToolboxSupport.instance.isSupported(clickedBlock.getLocation()) || clickedBlock.getState() instanceof Container) {
+                    if (LumberjackBlock.getBlock(clickedBlock.getLocation()) != null) return;
                     Location location = clickedBlock.getLocation();
                     //if (ItemSorterManager.instance.hasSorter(location)) {
                     if (ItemSorterManager.instance.hasSorter(player)) {
@@ -409,32 +375,25 @@ public class MainListener implements Listener {
             }
             removeSorter(event, clone);
         }
-        if (block.getState() instanceof Container state)
-        {
-            Location location = state.getInventory().getLocation();
-            if (PipesManager.isChestConnected(location))
-            {
-                PipesManager.removeChest(location);
-            }
-            if(ItemSorterManager.instance.hasSorter(event.getPlayer())) {
-                if (ItemSorterManager.instance.getSortingItem(event.getPlayer(), location) != null) {
-                    ContainerVisualManager.removeManager(location);
-                    ItemSorterManager.instance.removeContainer(event.getPlayer(), location);
-                }
-            }
+        if (block.getState() instanceof Container state) {
+            updatePipe(state.getInventory().getLocation(), event);
         }
-        if (SensibleToolboxSupport.instance.isSupported(block.getLocation()))
-        {
-            Location location = block.getLocation();
-            if (PipesManager.isChestConnected(location))
-            {
-                PipesManager.removeChest(location);
-            }
-            if(ItemSorterManager.instance.hasSorter(event.getPlayer())) {
-                if (ItemSorterManager.instance.getSortingItem(event.getPlayer(), location) != null) {
-                    ContainerVisualManager.removeManager(location);
-                    ItemSorterManager.instance.removeContainer(event.getPlayer(), location);
-                }
+
+        Location loc = block.getLocation();
+        if (SensibleToolboxSupport.instance.isSupported(loc) || SlimefunSupport.instance.isSupported(loc)) {
+            updatePipe(loc, event);
+        }
+
+    }
+
+    private static void updatePipe(Location location, BlockBreakEvent event) {
+        if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(location)) {
+            PipesManager.getInstant(PipeTypeEnum.COPPER).removeChest(location);
+        }
+        if (ItemSorterManager.instance.hasSorter(event.getPlayer())) {
+            if (ItemSorterManager.instance.getSortingItem(event.getPlayer(), location) != null) {
+                ContainerVisualManager.removeManager(location);
+                ItemSorterManager.instance.removeContainer(event.getPlayer(), location);
             }
         }
     }
@@ -479,20 +438,21 @@ public class MainListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    PipesManager.scanPlacedChest(location);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).scanPlacedChest(location);
                 }
             }.runTaskLater(TitanMachines.instants, 3);
 
         }
-        if (SensibleToolboxSupport.instance.isSupported(itemInHand))
+        if (SensibleToolboxSupport.instance.isSupported(itemInHand) || SlimefunSupport.instance.isSupported(itemInHand) || TitanMachines.itemStackTool.getTitanItemID(itemInHand).equalsIgnoreCase("JUNCTION_BOX".toLowerCase()))
         {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    PipesManager.scanPlacedChest(location);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).scanPlacedChest(location);
                 }
             }.runTaskLater(TitanMachines.instants, 3);
         }
+
         if (nbtTool.getBoolean(itemInHand, "trashbarrel") )
         {
             Location clone = location.clone();

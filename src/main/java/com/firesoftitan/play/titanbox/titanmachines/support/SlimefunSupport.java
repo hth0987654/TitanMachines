@@ -1,5 +1,13 @@
 package com.firesoftitan.play.titanbox.titanmachines.support;
 
+import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
+import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
+import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBItem;
+import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.setup.SlimefunItemSetup;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -22,6 +30,16 @@ public class SlimefunSupport extends PluginSupport{
         }
         return false;
     }
+    public boolean isSupported(ItemStack itemStack)
+    {
+        if (!this.isInstalled()) return false;
+        for(SlimefunItem item: Slimefun.getRegistry().getAllSlimefunItems())
+        {
+            if (TitanMachines.itemStackTool.isItemEqual(item.getItem(), itemStack)) return true;
+        }
+        return false;
+    }
+
     public Set<Integer> getInventorySlots(Location location)
     {
         if (this.isInstalled()) {

@@ -30,7 +30,6 @@ public class SensibleToolboxSupport extends PluginSupport{
     }
     public boolean isSupported(ItemStack itemStack)
     {
-        if (TitanMachines.itemStackTool.getTitanItemID(itemStack).equalsIgnoreCase("JUNCTION_BOX".toLowerCase())) return true;
         if (!this.isInstalled()) return false;
         if (SensibleToolbox.getItemRegistry().isSTBItem(itemStack))
         {

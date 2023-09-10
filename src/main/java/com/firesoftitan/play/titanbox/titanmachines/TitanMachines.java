@@ -2,6 +2,7 @@ package com.firesoftitan.play.titanbox.titanmachines;
 
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TabCompleteListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TitanMachineBlockListener;
@@ -70,6 +71,9 @@ public final class TitanMachines extends JavaPlugin {
         new ItemSorterManager();
         new TrashBarrelManager();
 
+        for(PipeTypeEnum typeEnum: PipeTypeEnum.values()) {
+            new PipesManager(typeEnum);
+        }
 
         new LumberjackRunnable().runTaskTimer(this, 20, 20);
         new BlockBreakerRunnable().runTaskTimer(this, 20, 20);

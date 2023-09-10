@@ -3,6 +3,7 @@ package com.firesoftitan.play.titanbox.titanmachines.guis;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Bukkit;
@@ -31,8 +32,8 @@ public class PipeConnectionGUI {
     public PipeConnectionGUI(Player player, Location chest) {
         this.location = chest.clone();
         this.player = player;
-        this.group = PipesManager.getGroup(this.location);
-        this.connections = PipesManager.getConnections(this.location);
+        this.group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(this.location);
+        this.connections = PipesManager.getInstant(PipeTypeEnum.COPPER).getConnections(this.location);
         this.inventory = Bukkit.createInventory(null, size, PipeConnectionGUI.name);
     }
 
@@ -65,14 +66,14 @@ public class PipeConnectionGUI {
         item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Pipe Info");
         List<String> lore = new ArrayList<String>();
         lore.add(ChatColor.AQUA + "Pipe Line ID: " + ChatColor.WHITE + this.group);
-        lore.add(ChatColor.AQUA + "Pipe Line Segments: " + ChatColor.WHITE + PipesManager.getGroupSize(this.group));
+        lore.add(ChatColor.AQUA + "Pipe Line Segments: " + ChatColor.WHITE + PipesManager.getInstant(PipeTypeEnum.COPPER).getGroupSize(this.group));
         for(Location location: connections)
         {
-            if (PipesManager.isPipe(location))
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
             {
                 lore.add(ChatColor.AQUA + "Connected to pipe" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
             }
-            else if (PipesManager.isChestConnected(location))
+            else if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(location))
             {
                 lore.add(ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
             }
@@ -91,7 +92,7 @@ public class PipeConnectionGUI {
         {
             Location location = connections.get(i - 1);
             item = new ItemStack(Material.BARRIER);
-            if (PipesManager.isPipe(location))
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
             {
                 item = TitanMachines.instants.getPipe();
                 item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Connected to pipe" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
@@ -101,12 +102,20 @@ public class PipeConnectionGUI {
                 item = TitanMachines.nbtTool.set(item, "connection", location);
                 item = TitanMachines.nbtTool.set(item, "group", group);
                 this.inventory.setItem(i, item.clone());
-            }else if (PipesManager.isChestConnected(location))
+            }else if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(location))
             {
                 Material material = location.getBlock().getType();
+                if (material == Material.PLAYER_WALL_HEAD) material = Material.PLAYER_HEAD;
                 item = new ItemStack(material);
+                if (material == Material.PLAYER_HEAD)
+                {
+                    String skullTexture = TitanMachines.tools.getSkullTool().getSkullTexture(location.getBlock());
+                    item = TitanMachines.tools.getSkullTool().getSkull(skullTexture);
+
+                }
+
                 item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
-                PipeChestType chestSettingsType = PipesManager.getChestSettingsType(location, group);
+                PipeChestType chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(location, group);
                 item = TitanMachines.itemStackTool.addLore(item,  ChatColor.YELLOW + "Type: " + ChatColor.GREEN + chestSettingsType.getCaption(),ChatColor.AQUA + "Left-Click: " + ChatColor.WHITE + "Change connection type",ChatColor.AQUA + "Right-Click: " + ChatColor.WHITE + "Open Advanced Inventory Settings");
                 item = TitanMachines.nbtTool.set(item, "button", 0);
                 item = TitanMachines.nbtTool.set(item, "location", this.location);
@@ -193,15 +202,15 @@ public class PipeConnectionGUI {
         if (!select.containsKey(player.getUniqueId())) return;
         SelectorGUI s = select.get(player.getUniqueId());
 
-        PipesManager.clearChestSettingsFilterType(s.getConnection(), s.getGroup());
+        PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(s.getConnection(), s.getGroup());
         for (int i : ContainerManager.getInventorySlots(s.getLocation(), s.getConnection())) {
             if (!TitanMachines.itemStackTool.isEmpty(item)) {
                 ItemStack filter = item.clone();
                 filter.setAmount(1);
 
                 PipeChestFilterType totalMatch = s.getPipeChestFilterType();
-                PipesManager.setChestSettingsFilterType(s.getConnection(), s.getGroup(), i, totalMatch);
-                PipesManager.setChestSettingsFilter(s.getConnection(), s.getGroup(), i, filter);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(s.getConnection(), s.getGroup(), i, totalMatch);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilter(s.getConnection(), s.getGroup(), i, filter);
                 select.remove(player.getUniqueId());
             }
         }
@@ -221,17 +230,17 @@ public class PipeConnectionGUI {
         if (button == 0)
         {
 
-            PipeChestType chestSettingsType = PipesManager.getChestSettingsType(chest, group);
+            PipeChestType chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(chest, group);
             PipeChestType nextSetting = PipeChestType.getPipeChestType(chestSettingsType.getValue() + 1);
-            PipesManager.setChestSettingsType(chest, group, nextSetting);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsType(chest, group, nextSetting);
             PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, pipe);
             pipeConnectionGUI.open();
-            PipesManager.rescanPipeOrientation(pipe);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).rescanPipeOrientation(pipe);
 
         }
         if (button == 2 || button == 12)
         {
-            PipesManager.clearChestSettingsFilterType(chest, group);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(chest, group);
             for(int i: ContainerManager.getInventorySlots(pipe, chest))
             {
                 ItemStack item = ContainerManager.getInventorySlot(pipe, chest, i);
@@ -239,12 +248,12 @@ public class PipeConnectionGUI {
                 {
                     ItemStack filter = item.clone();
                     filter.setAmount(1);
-                    PipesManager.setChestSettingsFilterType(chest, group, i, PipeChestFilterType.TOTAL_MATCH);
-                    PipesManager.setChestSettingsFilter(chest, group, i, filter);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.TOTAL_MATCH);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilter(chest, group, i, filter);
                 }
                 else
                 {
-                    PipesManager.setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
                 }
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
@@ -252,20 +261,20 @@ public class PipeConnectionGUI {
         }
         if (button == 3 || button == 13)
         {
-            PipesManager.clearChestSettingsFilterType(chest, group);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(chest, group);
             for(int i: ContainerManager.getInventorySlots(pipe, chest))
             {
-                PipesManager.setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
         }
         if (button == 4 || button == 14)
         {
-            PipesManager.clearChestSettingsFilterType(chest, group);
+            PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(chest, group);
             for(int i: ContainerManager.getInventorySlots(pipe, chest))
             {
-                PipesManager.setChestSettingsFilterType(chest, group, i, PipeChestFilterType.DISABLED);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.DISABLED);
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();

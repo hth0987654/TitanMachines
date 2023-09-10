@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.SorterGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Bukkit;
@@ -151,8 +152,8 @@ public class JunctionBoxBlock extends TitanBlock {
         for (BlockFace blockFace: blockFaces) {
 
             Location pipe = location.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
-            if (PipesManager.isPipe(pipe)) {
-                UUID group = PipesManager.getGroup(pipe);
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(pipe)) {
+                UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(pipe);
                 if (group.equals(uuid)) return pipe;
             }
         }
