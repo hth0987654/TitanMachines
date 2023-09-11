@@ -44,8 +44,8 @@ public class PipeRunnable extends BukkitRunnable {
             if (que_Process.isEmpty()) return;
             UUID uuid = que_Process.get(0);
             que_Process.remove(0);
-            pipeSubRunnable[index] = new PipeSubRunnable(uuid, this);
-            pipeSubRunnable[index].runTaskTimer(TitanMachines.instants, 10, 10);
+            pipeSubRunnable[index] = new PipeSubRunnable(uuid, PipeTypeEnum.COPPER);
+            pipeSubRunnable[index].runTaskTimer(TitanMachines.instants, 1, 1);
             long doneTime = System.currentTimeMillis() - startTIme;
             if (doneTime > 200) TitanMachines.messageTool.sendMessageSystem("Pipe main task took to long uuid:" + uuid + ":" + doneTime + " ms");
         }

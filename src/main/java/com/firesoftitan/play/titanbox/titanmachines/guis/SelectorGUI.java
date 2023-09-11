@@ -1,6 +1,6 @@
 package com.firesoftitan.play.titanbox.titanmachines.guis;
 
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class SelectorGUI {
     private int getter;
-    private PipeChestFilterType pipeChestFilterType;
+    private PipeChestFilterTypeEnum pipeChestFilterType;
     private BlockFace blockFace;
     private BlockFace currentBlockFace;
     private final Location location;
@@ -38,11 +38,11 @@ public class SelectorGUI {
         this.blockFace = blockFace;
     }
 
-    public void setPipeChestFilterType(PipeChestFilterType pipeChestFilterType) {
+    public void setPipeChestFilterType(PipeChestFilterTypeEnum pipeChestFilterType) {
         this.pipeChestFilterType = pipeChestFilterType;
     }
 
-    public PipeChestFilterType getPipeChestFilterType() {
+    public PipeChestFilterTypeEnum getPipeChestFilterType() {
 
         return pipeChestFilterType;
     }

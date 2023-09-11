@@ -3,8 +3,8 @@ package com.firesoftitan.play.titanbox.titanmachines.managers;
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
@@ -143,10 +143,10 @@ public class PipesManager {
                 }
                 if (isChestConnected(locationConnection))
                 {
-                    PipeChestType chestSettingsType = this.getChestSettingsType(locationConnection, oldGroup);
+                    PipeChestTypeEnum chestSettingsType = this.getChestSettingsType(locationConnection, oldGroup);
                     List<Integer> chestSettingsFilterAccessSlots = this.getChestSettingsFilterAccessSlots(locationConnection, oldGroup);
                     HashMap<Integer, ItemStack > itemStack = new HashMap<Integer, ItemStack>();
-                    HashMap<Integer, PipeChestFilterType > chestSettingsFilterType= new HashMap<Integer, PipeChestFilterType>();
+                    HashMap<Integer, PipeChestFilterTypeEnum> chestSettingsFilterType= new HashMap<Integer, PipeChestFilterTypeEnum>();
                     for(int k: chestSettingsFilterAccessSlots) {
                     //for(int k =0; k < 2; k++) {
                         itemStack.put(k,this.getChestSettingsFilter(locationConnection, oldGroup, k));
@@ -317,8 +317,8 @@ public class PipesManager {
             if (ContainerManager.isContainer(testLocation))
             {
                 UUID group = getGroup(location);
-                PipeChestType chestSettingsType = this.getChestSettingsType(testLocation, group);
-                if (chestSettingsType != PipeChestType.NOT_CONNECTED) hologramConnections.add(blockFace);
+                PipeChestTypeEnum chestSettingsType = this.getChestSettingsType(testLocation, group);
+                if (chestSettingsType != PipeChestTypeEnum.NOT_CONNECTED) hologramConnections.add(blockFace);
             }
         }
         return hologramConnections;
@@ -457,30 +457,30 @@ public class PipesManager {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.delete("chest." + key + ".settings." + group + ".filter");
     }
-    public void setChestSettingsFilterType(Location chest, UUID group, int slot, PipeChestFilterType type)
+    public void setChestSettingsFilterType(Location chest, UUID group, int slot, PipeChestFilterTypeEnum type)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".filter." + slot + ".type", type.getValue());
     }
-    public PipeChestFilterType getChestSettingsFilterType(Location chest, UUID group, int slot) {
+    public PipeChestFilterTypeEnum getChestSettingsFilterType(Location chest, UUID group, int slot) {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
-        if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot + ".type") && slot > 0) return PipeChestFilterType.DISABLED;
+        if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot + ".type") && slot > 0) return PipeChestFilterTypeEnum.DISABLED;
         int anInt = pipes.getInt("chest." + key + ".settings." + group + ".filter." + slot + ".type");
-        return PipeChestFilterType.getPipeChestType(anInt);
+        return PipeChestFilterTypeEnum.getPipeChestType(anInt);
     }
 
-    public void setChestSettingsType(Location chest, UUID group, PipeChestType type)
+    public void setChestSettingsType(Location chest, UUID group, PipeChestTypeEnum type)
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".type", type.getValue());
     }
-    public PipeChestType getChestSettingsType(Location chest, UUID group)
+    public PipeChestTypeEnum getChestSettingsType(Location chest, UUID group)
     {
-        if (group == null) return PipeChestType.NOT_CONNECTED;
+        if (group == null) return PipeChestTypeEnum.NOT_CONNECTED;
         String key = TitanMachines.serializeTool.serializeLocation(chest);
-        if (!pipes.contains("chest." + key + ".settings." + group + ".type")) setChestSettingsType(chest,group, PipeChestType.CHEST_IN);
+        if (!pipes.contains("chest." + key + ".settings." + group + ".type")) setChestSettingsType(chest,group, PipeChestTypeEnum.CHEST_IN);
         int anInt = pipes.getInt("chest." + key + ".settings." + group + ".type");
-        return PipeChestType.getPipeChestType(anInt);
+        return PipeChestTypeEnum.getPipeChestType(anInt);
     }
     private void removeConnection(Location pipe)
     {
@@ -599,7 +599,7 @@ public class PipesManager {
                 for (int slot: ContainerManager.getInventorySlots(from, chest))
                 {
                         if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot))
-                            setChestSettingsFilterType(chest, group, slot, PipeChestFilterType.ALL);
+                            setChestSettingsFilterType(chest, group, slot, PipeChestFilterTypeEnum.ALL);
                 }
                 return;
             }
@@ -624,32 +624,11 @@ public class PipesManager {
         {
             Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
             if (location != null) {
-                PipeChestType chestSettingsType = this.getChestSettingsType(location, group);
-                if (chestSettingsType == PipeChestType.CHEST_OUT) locations.add(location);
+                PipeChestTypeEnum chestSettingsType = this.getChestSettingsType(location, group);
+                if (chestSettingsType == PipeChestTypeEnum.CHEST_OUT) locations.add(location);
             }
 
         }
-        return locations;
-    }
-    public List<Location> getOverflowInGroup(UUID group)
-    {
-        List<Location> locations = new ArrayList<Location>();
-        List<Location> locationsLast = new ArrayList<Location>();
-        Set<String> groups = pipes.getKeys("groups." + group + ".chest");
-        for(String key: groups)
-        {
-            Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
-            if (location != null) {
-                PipeChestType chestSettingsType = this.getChestSettingsType(location, group);
-                if (chestSettingsType == PipeChestType.OVERFLOW) {
-                    PipeChestFilterType chestSettingsFilterType = this.getChestSettingsFilterType(location, group, 0);
-                    if (chestSettingsFilterType != PipeChestFilterType.ALL) locations.add(location);
-                    else locationsLast.add(location);
-                }
-            }
-
-        }
-        locations.addAll(locationsLast);
         return locations;
     }
     public List<Location> getInChestsInGroup(UUID group)
@@ -661,10 +640,10 @@ public class PipesManager {
         {
             Location location = pipes.getLocation("groups." + group + ".chest." + key + ".location");
             if (location != null) {
-                PipeChestType chestSettingsType = this.getChestSettingsType(location, group);
-                if (chestSettingsType == PipeChestType.CHEST_IN) {
-                    PipeChestFilterType chestSettingsFilterType = this.getChestSettingsFilterType(location, group, 0);
-                    if (chestSettingsFilterType != PipeChestFilterType.ALL) locations.add(location);
+                PipeChestTypeEnum chestSettingsType = this.getChestSettingsType(location, group);
+                if (chestSettingsType == PipeChestTypeEnum.CHEST_IN) {
+                    PipeChestFilterTypeEnum chestSettingsFilterType = this.getChestSettingsFilterType(location, group, 0);
+                    if (chestSettingsFilterType != PipeChestFilterTypeEnum.ALL) locations.add(location);
                     else locationsLast.add(location);
                 }
             }
@@ -738,8 +717,8 @@ public class PipesManager {
                 {
                     pipes.set("chest." + key + ".groups." + i + ".id", keepingGroup);
                     //Setting merge\
-                    PipeChestType chestSettingsType = PipeChestType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".type"));
-                    if (!pipes.contains("chest." + key + ".settings." + removingGroup + ".type")) chestSettingsType = PipeChestType.CHEST_IN;
+                    PipeChestTypeEnum chestSettingsType = PipeChestTypeEnum.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".type"));
+                    if (!pipes.contains("chest." + key + ".settings." + removingGroup + ".type")) chestSettingsType = PipeChestTypeEnum.CHEST_IN;
                     pipes.set("chest." + key + ".settings." + keepingGroup + ".type", chestSettingsType.getValue());
 
                     Set<String> keys = pipes.getKeys("chest." + key + ".settings." + removingGroup + ".filter");
@@ -750,7 +729,7 @@ public class PipesManager {
                     }
                     for (int k: chestSettingsFilterAccessSlots) {
                         ItemStack itemStack = pipes.getItem("chest." + key + ".settings." + removingGroup + ".filter." + k + ".item");
-                        PipeChestFilterType chestSettingsFilterType = PipeChestFilterType.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".filter." + k + ".type"));
+                        PipeChestFilterTypeEnum chestSettingsFilterType = PipeChestFilterTypeEnum.getPipeChestType(pipes.getInt("chest." + key + ".settings." + removingGroup + ".filter." + k + ".type"));
                         pipes.set("chest." + key + ".settings." + keepingGroup + ".filter." + k + ".item", itemStack);
                         pipes.set("chest." + key + ".settings." + keepingGroup + ".filter." + k + ".type", chestSettingsFilterType.getValue());
                     }

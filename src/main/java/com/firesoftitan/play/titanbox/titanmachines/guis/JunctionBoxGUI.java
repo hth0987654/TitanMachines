@@ -4,7 +4,7 @@ import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -92,8 +92,8 @@ public class JunctionBoxGUI {
             {
                 if (select.get(player.getUniqueId()).getBlockFace() == face)
                 {
-                    if (select.get(player.getUniqueId()).getPipeChestFilterType() == PipeChestFilterType.TOTAL_MATCH) item = new ItemStack(Material.CLOCK);
-                    else if (select.get(player.getUniqueId()).getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY)  item = new ItemStack(Material.COMPASS);
+                    if (select.get(player.getUniqueId()).getPipeChestFilterType() == PipeChestFilterTypeEnum.TOTAL_MATCH) item = new ItemStack(Material.CLOCK);
+                    else if (select.get(player.getUniqueId()).getPipeChestFilterType() == PipeChestFilterTypeEnum.MATERIAL_ONLY)  item = new ItemStack(Material.COMPASS);
                     else item = new ItemStack(Material.BARRIER);
 
                 }
@@ -196,7 +196,7 @@ public class JunctionBoxGUI {
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             if (junctionBoxBlock != null) {
                 List<ItemStack> filterList = junctionBoxBlock.getFilterList(s.getBlockFace());
-                if (s.getPipeChestFilterType() == PipeChestFilterType.DISABLED || filterList.size() < 20)
+                if (s.getPipeChestFilterType() == PipeChestFilterTypeEnum.DISABLED || filterList.size() < 20)
                 {
                     filterList.add(item.clone());
                     junctionBoxBlock.setFilterType(s.getBlockFace(), item, s.getPipeChestFilterType());
@@ -238,10 +238,10 @@ public class JunctionBoxGUI {
             }
             s.setBlockFace(JunctionBoxBlock.blockFaces[button - 27]);
             s.setCurrentBlockFace(blockFace);
-            if (s.getPipeChestFilterType() == null) s.setPipeChestFilterType(PipeChestFilterType.TOTAL_MATCH);
-            else if (s.getPipeChestFilterType() == PipeChestFilterType.TOTAL_MATCH) s.setPipeChestFilterType(PipeChestFilterType.MATERIAL_ONLY);
-            else if (s.getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY) s.setPipeChestFilterType(PipeChestFilterType.DISABLED);
-            else s.setPipeChestFilterType(PipeChestFilterType.TOTAL_MATCH);
+            if (s.getPipeChestFilterType() == null) s.setPipeChestFilterType(PipeChestFilterTypeEnum.TOTAL_MATCH);
+            else if (s.getPipeChestFilterType() == PipeChestFilterTypeEnum.TOTAL_MATCH) s.setPipeChestFilterType(PipeChestFilterTypeEnum.MATERIAL_ONLY);
+            else if (s.getPipeChestFilterType() == PipeChestFilterTypeEnum.MATERIAL_ONLY) s.setPipeChestFilterType(PipeChestFilterTypeEnum.DISABLED);
+            else s.setPipeChestFilterType(PipeChestFilterTypeEnum.TOTAL_MATCH);
             select.put(player.getUniqueId(), s);
             JunctionBoxGUI junctionBoxGUI = new JunctionBoxGUI(player, location);
             junctionBoxGUI.setCurrentFace(blockFace);

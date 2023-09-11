@@ -1,6 +1,6 @@
 package com.firesoftitan.play.titanbox.titanmachines.enums;
 
-public enum PipeChestFilterType {
+public enum PipeChestFilterTypeEnum {
     DISABLED(-1, "Disabled"),
     ALL(0, "No filter"),
     TOTAL_MATCH(1, "100% match"),
@@ -8,7 +8,7 @@ public enum PipeChestFilterType {
 
     private final int value;
     private final String caption;
-    PipeChestFilterType(int value, String caption) {
+    PipeChestFilterTypeEnum(int value, String caption) {
         this.value = value;
         this.caption = caption;
     }
@@ -20,7 +20,7 @@ public enum PipeChestFilterType {
     public int getValue() {
         return value;
     }
-    public static PipeChestFilterType getPipeChestType(int value)
+    public static PipeChestFilterTypeEnum getPipeChestType(int value)
     {
         switch (value)
         {

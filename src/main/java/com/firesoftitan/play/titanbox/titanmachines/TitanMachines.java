@@ -43,6 +43,7 @@ public final class TitanMachines extends JavaPlugin {
     public static boolean pipedEnabled = true;
     public static boolean sorterEnabled = true;
     public static boolean hopperEnabled = true;
+    public PipeRunnable pipeRunnable;
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -79,18 +80,13 @@ public final class TitanMachines extends JavaPlugin {
         new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
         new HopperRunnable().runTaskTimer(this, 20, 20);
         new SorterRunnable().runTaskTimer(this, 20, 20);
-        new PipeRunnable().runTaskTimer(this, 5, 5);
+        pipeRunnable = new PipeRunnable();
+        pipeRunnable.runTaskTimer(this, 5, 5);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
         Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
-/*        new BukkitRunnable() {
-            @Override
-            public void run() {
-                PipesManager.rescanAllPipes();
-            }
-        }.runTaskLater(this,10);*/
 
     }
 

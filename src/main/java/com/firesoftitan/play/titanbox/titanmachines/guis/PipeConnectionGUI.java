@@ -1,8 +1,8 @@
 package com.firesoftitan.play.titanbox.titanmachines.guis;
 
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
@@ -115,7 +115,7 @@ public class PipeConnectionGUI {
                 }
 
                 item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
-                PipeChestType chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(location, group);
+                PipeChestTypeEnum chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(location, group);
                 item = TitanMachines.itemStackTool.addLore(item,  ChatColor.YELLOW + "Type: " + ChatColor.GREEN + chestSettingsType.getCaption(),ChatColor.AQUA + "Left-Click: " + ChatColor.WHITE + "Change connection type",ChatColor.AQUA + "Right-Click: " + ChatColor.WHITE + "Open Advanced Inventory Settings");
                 item = TitanMachines.nbtTool.set(item, "button", 0);
                 item = TitanMachines.nbtTool.set(item, "location", this.location);
@@ -123,9 +123,9 @@ public class PipeConnectionGUI {
                 item = TitanMachines.nbtTool.set(item, "group", group);
                 this.inventory.setItem(i, item.clone());
 
-                if (chestSettingsType == PipeChestType.OVERFLOW ||chestSettingsType == PipeChestType.CHEST_IN || chestSettingsType == PipeChestType.CHEST_OUT) {
+                if (chestSettingsType == PipeChestTypeEnum.CHEST_IN || chestSettingsType == PipeChestTypeEnum.CHEST_OUT) {
 
-                    if (chestSettingsType == PipeChestType.OVERFLOW || chestSettingsType == PipeChestType.CHEST_IN) {
+                    if (chestSettingsType == PipeChestTypeEnum.CHEST_IN) {
                         item = new ItemStack(Material.BOOK);
                         item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Scan Container");
                         item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "This will scan container for filter");
@@ -142,7 +142,7 @@ public class PipeConnectionGUI {
                         }
                         if (getI == 1) {
                             item = new ItemStack(Material.CLOCK);
-                            if (s.getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY) item = new ItemStack(Material.COMPASS);
+                            if (s.getPipeChestFilterType() == PipeChestFilterTypeEnum.MATERIAL_ONLY) item = new ItemStack(Material.COMPASS);
                             item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Click Item To set");
                             item = TitanMachines.itemStackTool.addLore(item, ChatColor.YELLOW + "Type: " + ChatColor.GREEN + s.getPipeChestFilterType().getCaption(), ChatColor.WHITE + "Click Item in your inventory, now!", ChatColor.WHITE + "Click here to change type", ChatColor.WHITE + "Right Click to cancel");
                         }
@@ -208,7 +208,7 @@ public class PipeConnectionGUI {
                 ItemStack filter = item.clone();
                 filter.setAmount(1);
 
-                PipeChestFilterType totalMatch = s.getPipeChestFilterType();
+                PipeChestFilterTypeEnum totalMatch = s.getPipeChestFilterType();
                 PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(s.getConnection(), s.getGroup(), i, totalMatch);
                 PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilter(s.getConnection(), s.getGroup(), i, filter);
                 select.remove(player.getUniqueId());
@@ -230,8 +230,8 @@ public class PipeConnectionGUI {
         if (button == 0)
         {
 
-            PipeChestType chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(chest, group);
-            PipeChestType nextSetting = PipeChestType.getPipeChestType(chestSettingsType.getValue() + 1);
+            PipeChestTypeEnum chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(chest, group);
+            PipeChestTypeEnum nextSetting = PipeChestTypeEnum.getPipeChestType(chestSettingsType.getValue() + 1);
             PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsType(chest, group, nextSetting);
             PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, pipe);
             pipeConnectionGUI.open();
@@ -248,12 +248,12 @@ public class PipeConnectionGUI {
                 {
                     ItemStack filter = item.clone();
                     filter.setAmount(1);
-                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.TOTAL_MATCH);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.TOTAL_MATCH);
                     PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilter(chest, group, i, filter);
                 }
                 else
                 {
-                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.ALL);
                 }
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
@@ -264,7 +264,7 @@ public class PipeConnectionGUI {
             PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(chest, group);
             for(int i: ContainerManager.getInventorySlots(pipe, chest))
             {
-                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.ALL);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.ALL);
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
@@ -274,7 +274,7 @@ public class PipeConnectionGUI {
             PipesManager.getInstant(PipeTypeEnum.COPPER).clearChestSettingsFilterType(chest, group);
             for(int i: ContainerManager.getInventorySlots(pipe, chest))
             {
-                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterType.DISABLED);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.DISABLED);
             }
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
@@ -287,8 +287,8 @@ public class PipeConnectionGUI {
             {
                 s = new SelectorGUI(pipe, chest, group);
             }
-            if (s.getPipeChestFilterType() == null || s.getPipeChestFilterType() == PipeChestFilterType.MATERIAL_ONLY) s.setPipeChestFilterType(PipeChestFilterType.TOTAL_MATCH);
-            else s.setPipeChestFilterType(PipeChestFilterType.MATERIAL_ONLY);
+            if (s.getPipeChestFilterType() == null || s.getPipeChestFilterType() == PipeChestFilterTypeEnum.MATERIAL_ONLY) s.setPipeChestFilterType(PipeChestFilterTypeEnum.TOTAL_MATCH);
+            else s.setPipeChestFilterType(PipeChestFilterTypeEnum.MATERIAL_ONLY);
             s.setGetter(1);
             select.put(player.getUniqueId(), s);
             if (button == 15) select.remove(player.getUniqueId());

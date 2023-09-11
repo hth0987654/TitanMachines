@@ -3,7 +3,7 @@ package com.firesoftitan.play.titanbox.titanmachines.blocks;
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.SaveManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterType;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.SorterGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
@@ -35,12 +35,12 @@ public class JunctionBoxBlock extends TitanBlock {
     public JunctionBoxBlock(SaveManager saveManager) {
         super(saveManager);
     }
-    public PipeChestFilterType getFilterType(BlockFace blockFace, ItemStack itemStack)
+    public PipeChestFilterTypeEnum getFilterType(BlockFace blockFace, ItemStack itemStack)
     {
         String name = TitanMachines.itemStackTool.getName(itemStack);
         String yamlValid = name.replaceAll("[^a-zA-Z0-9_.-]", "");
         int value = saveManager.getInt(blockFace.name() + ".filter.type." + yamlValid);
-        return PipeChestFilterType.getPipeChestType(value);
+        return PipeChestFilterTypeEnum.getPipeChestType(value);
     }
     public BlockFace getFilter(ItemStack itemStack)
     {
@@ -56,9 +56,9 @@ public class JunctionBoxBlock extends TitanBlock {
         List<ItemStack> itemList = saveManager.getItemList(blockFace.name() + ".filter.items");
         for(ItemStack itemStack1: itemList)
         {
-            if (getFilterType(blockFace, itemStack) == PipeChestFilterType.TOTAL_MATCH)
+            if (getFilterType(blockFace, itemStack) == PipeChestFilterTypeEnum.TOTAL_MATCH)
                 if (TitanMachines.itemStackTool.isItemEqual(itemStack1, itemStack)) return true;
-            if (getFilterType(blockFace, itemStack) == PipeChestFilterType.MATERIAL_ONLY)
+            if (getFilterType(blockFace, itemStack) == PipeChestFilterTypeEnum.MATERIAL_ONLY)
                 if (itemStack1.getType().equals(itemStack.getType())) return true;
         }
         return false;
@@ -67,7 +67,7 @@ public class JunctionBoxBlock extends TitanBlock {
     {
         return saveManager.getItemList(blockFace.name() + ".filter.items");
     }
-    public void setFilterType(BlockFace blockFace, ItemStack itemStack, PipeChestFilterType pipe)
+    public void setFilterType(BlockFace blockFace, ItemStack itemStack, PipeChestFilterTypeEnum pipe)
     {
         String name = TitanMachines.itemStackTool.getName(itemStack);
         String yamlValid = name.replaceAll("[^a-zA-Z0-9_.-]", "");
@@ -87,11 +87,7 @@ public class JunctionBoxBlock extends TitanBlock {
                 it.remove();
             } else {
                 // First time seeing this name - add it
-                if (getFilterType(blockFace, item) != PipeChestFilterType.DISABLED)
-                {
-                    System.out.println(name + ":" + getFilterType(blockFace, item));
-                    seenNames.add(name);
-                }
+                if (getFilterType(blockFace, item) != PipeChestFilterTypeEnum.DISABLED) seenNames.add(name);
                 else it.remove();
             }
         }
