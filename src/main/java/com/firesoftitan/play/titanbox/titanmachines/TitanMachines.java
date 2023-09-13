@@ -81,9 +81,10 @@ public final class TitanMachines extends JavaPlugin {
         new HopperRunnable().runTaskTimer(this, 20, 20);
         new SorterRunnable().runTaskTimer(this, 20, 20);
         pipeRunnable = new PipeRunnable();
-        pipeRunnable.runTaskTimer(this, 5, 5);
+        pipeRunnable.runTaskTimer(this, 1, 1);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
+        new TPSMonitorRunnable().runTaskTimer(this, 20, 20);
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
         Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
@@ -99,6 +100,15 @@ public final class TitanMachines extends JavaPlugin {
             if (label.equalsIgnoreCase("titanmachines") || label.equalsIgnoreCase("tm")) {
                 if (args.length > 0) {
                     String name = args[0];
+                    if (name.equalsIgnoreCase("tps"))
+                    {
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "-------------------------------");
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.AQUA + "Current TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getCurrentTick());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GREEN + "Average TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getAverageMinute());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GOLD + "Minimum TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getMinimumTick());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "-------------------------------");
+                        return true;
+                    }
                     if (name.equalsIgnoreCase("toggle"))
                     {
                         if (args.length > 1) {

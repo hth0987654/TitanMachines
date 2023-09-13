@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class TabCompleteListener implements TabCompleter {
-    private static final String[] ADMIN_COMMANDS = {"give", "toggle", "reload"};
+    private static final String[] ADMIN_COMMANDS = {"give", "toggle", "reload", "tps"};
     private static final String[] NON_ADMIN_COMMANDS = {};
     private final List<String> pluginNames = new ArrayList<String>();
     @Nullable

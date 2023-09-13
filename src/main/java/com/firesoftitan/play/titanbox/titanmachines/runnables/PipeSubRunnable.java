@@ -33,6 +33,10 @@ public class PipeSubRunnable extends BukkitRunnable {
 
     }
 
+    public UUID getUuid() {
+        return uuid;
+    }
+
     public PipeTypeEnum getType() {
         return type;
     }
