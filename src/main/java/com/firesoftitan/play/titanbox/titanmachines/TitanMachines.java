@@ -81,7 +81,7 @@ public final class TitanMachines extends JavaPlugin {
         new HopperRunnable().runTaskTimer(this, 20, 20);
         new SorterRunnable().runTaskTimer(this, 20, 20);
         pipeRunnable = new PipeRunnable();
-        pipeRunnable.runTaskTimer(this, 1, 1);
+        pipeRunnable.runTaskTimer(this, 3, 3);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
         new TPSMonitorRunnable().runTaskTimer(this, 20, 20);

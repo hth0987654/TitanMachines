@@ -34,7 +34,7 @@ public class JunctionBoxRunnable extends BukkitRunnable {
             return;
         }
         JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-        if (junctionBoxBlock == null)
+        if (junctionBoxBlock == null || !junctionBoxBlock.getLocation().getChunk().isLoaded())
         {
             quList.remove(0);
             return;

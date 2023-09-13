@@ -78,7 +78,7 @@ public class PipeSubRunnable extends BukkitRunnable {
             for (int k : chestSettingsFilterAccessSlots) {
                 ItemStack InChestSettingsFilter = PipesManager.getInstant(this.type).getChestSettingsFilter(chestIn, uuid, k);
                 PipeChestFilterTypeEnum InChestSettingsFilterType = PipesManager.getInstant(this.type).getChestSettingsFilterType(chestIn, uuid, k);
-                scanChest(uuid, k, chestOut, chestIn, InChestSettingsFilterType, InChestSettingsFilter);
+                if(chestIn.getChunk().isLoaded() && chestOut.getChunk().isLoaded()) scanChest(uuid, k, chestOut, chestIn, InChestSettingsFilterType, InChestSettingsFilter);
             }
         }
         long doneTime = System.currentTimeMillis() - startTIme;

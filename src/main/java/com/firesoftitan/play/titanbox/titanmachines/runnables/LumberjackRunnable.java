@@ -39,79 +39,78 @@ public class LumberjackRunnable extends BukkitRunnable {
         }
         if (runningKeys.isEmpty()) return;
         for(Location location: runningKeys) {
-            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(LumberjackBlock.titanID, location);
-            if (titanBlock == null) continue;
-            LumberjackBlock lumberjackBlock = LumberjackBlock.convert(titanBlock);
-            if (lumberjackBlock == null) continue;
-            if (lumberjackBlock.isPowered()) {
-                if (location.getChunk().isLoaded()) {
-                    Material saplingMaterial = lumberjackBlock.getSaplingMaterial();
-                    int saplingCount = lumberjackBlock.getSaplingCount();
-                    Block block = location.getBlock();
-                    if (block.getBlockData() instanceof  Directional) {
-                        BlockFace facing = ((Directional) block.getBlockData()).getFacing();
-                        Block base = block.getRelative(facing);
-                        if (base.getType().name().contains("SAPLING") && lumberjackBlock.getSaplingMaterial() != base.getType()) lumberjackBlock.clearSapling(base.getType());
-                        if (base.getType() == Material.AIR)
-                        {
-                            if (saplingCount > 0) {
-                                base.setType(saplingMaterial);
-                                lumberjackBlock.removeSapling(saplingMaterial);
-                                saplingCount = lumberjackBlock.getSaplingCount();
-                            }
-                        }
-                        if (isBlockBreakable(base)) {
-                            World world = base.getWorld();
-                            int cap = 1;
-                            for (int y = 0; y < cap; y++) {
-                                for (int x = -4; x < 5; x++) {
-                                    for (int z = -4; z < 5; z++) {
-                                        Block relative = block.getRelative(x, y, z);
-                                        if (isBlockBreakable(block.getRelative(x, y + 1, z)) && cap == y + 1) cap++;
-                                        if (isBlockBreakable(relative)) {
-                                            Collection<ItemStack> drops = relative.getDrops();
-                                            if (y == 0)
-                                            {
-                                                if (relative.getType().name().contains("WOOD") || relative.getType().name().contains("LOG")) {
-                                                    if (saplingCount > 0) {
-                                                        relative.setType(saplingMaterial);
-                                                        lumberjackBlock.removeSapling(saplingMaterial);
-                                                        saplingCount = lumberjackBlock.getSaplingCount();
-                                                    } else relative.setType(Material.AIR);
-                                                }
-                                            }
-                                            else relative.setType(Material.AIR);
-                                            for (ItemStack itemStack : drops) {
-                                                boolean dropsap = true;
-                                                if (itemStack.getType().name().contains("SAPLING"))
-                                                {
-                                                    if (saplingMaterial == null || (itemStack.getType() == saplingMaterial && saplingCount < 9) || itemStack.getType() != saplingMaterial)
-                                                    {
-                                                        lumberjackBlock.addSapling( itemStack.getType());
-                                                        saplingMaterial = lumberjackBlock.getSaplingMaterial();
-                                                        saplingCount = lumberjackBlock.getSaplingCount();
-                                                        dropsap = false;
-                                                    }
-                                                }
-                                                if (dropsap) world.dropItem(relative.getLocation().clone().add(0.5f, 1, 0.5f), itemStack);
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-                            world.playSound(base.getLocation(), Sound.BLOCK_WOOD_BREAK, 1, 1);
-                            saplingCount = lumberjackBlock.getSaplingCount();
+            if (location.getChunk().isLoaded()) {
+                TitanBlock titanBlock = TitanBlockManager.getTitanBlock(LumberjackBlock.titanID, location);
+                if (titanBlock == null) continue;
+                LumberjackBlock lumberjackBlock = LumberjackBlock.convert(titanBlock);
+                if (lumberjackBlock == null) continue;
+                if (lumberjackBlock.isPowered()) {
+                    if (location.getChunk().isLoaded()) {
+                        Material saplingMaterial = lumberjackBlock.getSaplingMaterial();
+                        int saplingCount = lumberjackBlock.getSaplingCount();
+                        Block block = location.getBlock();
+                        if (block.getBlockData() instanceof Directional) {
+                            BlockFace facing = ((Directional) block.getBlockData()).getFacing();
+                            Block base = block.getRelative(facing);
+                            if (base.getType().name().contains("SAPLING") && lumberjackBlock.getSaplingMaterial() != base.getType())
+                                lumberjackBlock.clearSapling(base.getType());
                             if (base.getType() == Material.AIR) {
                                 if (saplingCount > 0) {
                                     base.setType(saplingMaterial);
                                     lumberjackBlock.removeSapling(saplingMaterial);
+                                    saplingCount = lumberjackBlock.getSaplingCount();
+                                }
+                            }
+                            if (isBlockBreakable(base)) {
+                                World world = base.getWorld();
+                                int cap = 1;
+                                for (int y = 0; y < cap; y++) {
+                                    for (int x = -4; x < 5; x++) {
+                                        for (int z = -4; z < 5; z++) {
+                                            Block relative = block.getRelative(x, y, z);
+                                            if (isBlockBreakable(block.getRelative(x, y + 1, z)) && cap == y + 1) cap++;
+                                            if (isBlockBreakable(relative)) {
+                                                Collection<ItemStack> drops = relative.getDrops();
+                                                if (y == 0) {
+                                                    if (relative.getType().name().contains("WOOD") || relative.getType().name().contains("LOG")) {
+                                                        if (saplingCount > 0) {
+                                                            relative.setType(saplingMaterial);
+                                                            lumberjackBlock.removeSapling(saplingMaterial);
+                                                            saplingCount = lumberjackBlock.getSaplingCount();
+                                                        } else relative.setType(Material.AIR);
+                                                    }
+                                                } else relative.setType(Material.AIR);
+                                                for (ItemStack itemStack : drops) {
+                                                    boolean dropsap = true;
+                                                    if (itemStack.getType().name().contains("SAPLING")) {
+                                                        if (saplingMaterial == null || (itemStack.getType() == saplingMaterial && saplingCount < 9) || itemStack.getType() != saplingMaterial) {
+                                                            lumberjackBlock.addSapling(itemStack.getType());
+                                                            saplingMaterial = lumberjackBlock.getSaplingMaterial();
+                                                            saplingCount = lumberjackBlock.getSaplingCount();
+                                                            dropsap = false;
+                                                        }
+                                                    }
+                                                    if (dropsap)
+                                                        world.dropItem(relative.getLocation().clone().add(0.5f, 1, 0.5f), itemStack);
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                                world.playSound(base.getLocation(), Sound.BLOCK_WOOD_BREAK, 1, 1);
+                                saplingCount = lumberjackBlock.getSaplingCount();
+                                if (base.getType() == Material.AIR) {
+                                    if (saplingCount > 0) {
+                                        base.setType(saplingMaterial);
+                                        lumberjackBlock.removeSapling(saplingMaterial);
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
     }
