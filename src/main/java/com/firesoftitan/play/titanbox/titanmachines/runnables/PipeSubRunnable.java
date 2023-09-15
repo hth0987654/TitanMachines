@@ -9,18 +9,18 @@ import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
 public class PipeSubRunnable extends BukkitRunnable {
 
-    private List<Location> OutChestsInGroup;
+    private final List<Location> OutChestsInGroup;
     private List<Location> InChestsInGroup;
     private final UUID uuid;
     private boolean done;
     private final long createdTime;
+    private long runTime = 0;
     private final PipeTypeEnum type;
 
     public PipeSubRunnable(UUID uuid, PipeTypeEnum type) {
@@ -30,7 +30,6 @@ public class PipeSubRunnable extends BukkitRunnable {
         OutChestsInGroup = PipesManager.getInstant(this.type).getOutChestsInGroup(uuid);
         InChestsInGroup = PipesManager.getInstant(this.type).getInChestsInGroup(uuid);
         createdTime = System.currentTimeMillis();
-
     }
 
     public UUID getUuid() {
@@ -44,6 +43,11 @@ public class PipeSubRunnable extends BukkitRunnable {
     public boolean isDone() {
         return done;
     }
+
+    public long getRunTime() {
+        return runTime;
+    }
+
     @Override
     public void run() {
         if (!TitanMachines.pipedEnabled) {
@@ -64,26 +68,29 @@ public class PipeSubRunnable extends BukkitRunnable {
         long startTIme = System.currentTimeMillis();
 
         Location chestOut = OutChestsInGroup.get(0).clone();
-        Location chestIn;
         if (InChestsInGroup.isEmpty())
         {
             OutChestsInGroup.remove(0);
             InChestsInGroup = PipesManager.getInstant(this.type).getInChestsInGroup(uuid);
         }
         else {
-            chestIn = InChestsInGroup.get(0).clone();
-            InChestsInGroup.remove(0);
-
-            List<Integer> chestSettingsFilterAccessSlots = PipesManager.getInstant(this.type).getChestSettingsFilterAccessSlots(chestIn, uuid);
-            for (int k : chestSettingsFilterAccessSlots) {
-                ItemStack InChestSettingsFilter = PipesManager.getInstant(this.type).getChestSettingsFilter(chestIn, uuid, k);
-                PipeChestFilterTypeEnum InChestSettingsFilterType = PipesManager.getInstant(this.type).getChestSettingsFilterType(chestIn, uuid, k);
-                if(chestIn.getChunk().isLoaded() && chestOut.getChunk().isLoaded()) scanChest(uuid, k, chestOut, chestIn, InChestSettingsFilterType, InChestSettingsFilter);
+            for (Location chestIn: InChestsInGroup) {
+                List<Integer> chestSettingsFilterAccessSlots = PipesManager.getInstant(this.type).getChestSettingsFilterAccessSlots(chestIn, uuid);
+                long startTImeL = System.currentTimeMillis();
+                for (int k : chestSettingsFilterAccessSlots) {
+                    ItemStack InChestSettingsFilter = PipesManager.getInstant(this.type).getChestSettingsFilter(chestIn, uuid, k);
+                    PipeChestFilterTypeEnum InChestSettingsFilterType = PipesManager.getInstant(this.type).getChestSettingsFilterType(chestIn, uuid, k);
+                    if (chestIn.getChunk().isLoaded() && chestOut.getChunk().isLoaded())
+                        scanChest(uuid, k, chestOut, chestIn, InChestSettingsFilterType, InChestSettingsFilter);
+                }
+                long done = System.currentTimeMillis() - startTImeL;
+                //if (done > 100) System.out.println(uuid + ": " + chestSettingsFilterAccessSlots.size() + ": " + done + ": " + chestOut);
             }
+            InChestsInGroup.clear();
         }
-        long doneTime = System.currentTimeMillis() - startTIme;
-        if (doneTime > 1000)
-            TitanMachines.messageTool.sendMessageSystem("Pipe sub task took to long uuid:" + uuid + ":" + doneTime + " ms");
+        this.runTime = Math.max(System.currentTimeMillis() - startTIme, this.runTime);
+        if (this.runTime > 1000)
+            TitanMachines.messageTool.sendMessageSystem("Pipe sub task took to long uuid:" + uuid + ":" + runTime + " ms");
 
     }
     private void scanChest(UUID group, int slot, Location chestOut, Location chestIn, PipeChestFilterTypeEnum chestInFilterType, ItemStack chestInFilterItem)

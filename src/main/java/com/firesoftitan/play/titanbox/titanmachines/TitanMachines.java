@@ -6,7 +6,6 @@ import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.MainListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TabCompleteListener;
 import com.firesoftitan.play.titanbox.titanmachines.listeners.TitanMachineBlockListener;
-import com.firesoftitan.play.titanbox.titanmachines.loaders.ConfigLoader;
 import com.firesoftitan.play.titanbox.titanmachines.managers.*;
 import com.firesoftitan.play.titanbox.titanmachines.runnables.*;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
@@ -21,7 +20,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -32,7 +30,6 @@ public final class TitanMachines extends JavaPlugin {
     public static Tools tools;
     public static LibsHologramTool hologramTool;
     public static TitanMachines instants;
-    public static ConfigLoader configLoader;
     public static  LibsNBTTool nbtTool;
     public static  LibsItemStackTool itemStackTool;
     public static LibsMessageTool messageTool;
@@ -62,7 +59,6 @@ public final class TitanMachines extends JavaPlugin {
 
         mainListener = new MainListener(this);
         mainListener.registerEvents();
-        configLoader = new ConfigLoader();
         TitanBlockManager.registerListener(this, new TitanMachineBlockListener());
 
         visualTask = new VisualRunnable();

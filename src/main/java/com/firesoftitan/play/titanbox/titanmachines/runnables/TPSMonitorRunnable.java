@@ -23,11 +23,11 @@ public class TPSMonitorRunnable extends BukkitRunnable {
         long passed = System.currentTimeMillis() - this.lastTime;
         if (passed <= 0) passed = 50;
         currentTick = (1000f / (float)passed) * 20;
-        if (counter > 29)
+/*        if (counter > 29)
         {
-            System.out.println(currentTick + "/" + getMinimumTick() + "/" + getAverageMinute());
+            System.out.println(getMinimumTick() + "/" + getMaximumTick() + "/" + getAverageMinute());
             counter = 0;
-        }
+        }*/
         last60.add(currentTick);
         if (last60.size() > 59) last60.remove(0);
         lastTime = System.currentTimeMillis();
@@ -42,6 +42,16 @@ public class TPSMonitorRunnable extends BukkitRunnable {
     }
     public float getTickOff() {
         return 20 - currentTick;
+    }
+    public float getMaximumTick()
+    {
+        float max = Float.MIN_VALUE;
+        for (float f : last60) {
+            if (f > max) {
+                max = f;
+            }
+        }
+        return max;
     }
     public float getMinimumTick()
     {

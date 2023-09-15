@@ -10,6 +10,7 @@ import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -20,13 +21,14 @@ public class JunctionBoxBlock extends TitanBlock {
 
     public static final BlockFace[] blockFaces = {BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH,BlockFace.NORTH,BlockFace.EAST,BlockFace.WEST};
     public static final String titanID = "JUNCTION_BOX";
+
     public static JunctionBoxBlock convert(TitanBlock titanBlock)
     {
         if (titanBlock.getTitanID() == null) return null;
         if (!titanBlock.getTitanID().equals(JunctionBoxBlock.titanID)) return null;
         return new JunctionBoxBlock(titanBlock.getSaveManager());
     }
-
+    public final HashMap<BlockFace, Inventory> sides = new HashMap<BlockFace, Inventory>();
     public JunctionBoxBlock(String titanID, ItemStack itemStack, Location location) {
         super(titanID, itemStack, location);
 
@@ -34,6 +36,12 @@ public class JunctionBoxBlock extends TitanBlock {
 
     public JunctionBoxBlock(SaveManager saveManager) {
         super(saveManager);
+        for(BlockFace blockFace: blockFaces)
+        {
+            Inventory inventory = Bukkit.createInventory(null, 18, SorterGUI.name + " " + blockFace.name());
+            sides.put(blockFace, inventory);
+
+        }
     }
     public PipeChestFilterTypeEnum getFilterType(BlockFace blockFace, ItemStack itemStack)
     {
@@ -101,12 +109,13 @@ public class JunctionBoxBlock extends TitanBlock {
     {
         List<ItemStack> itemList = saveManager.getItemList(blockFace.name() + ".inventory");
         ItemStack[] itemStackArray = itemList.toArray(new ItemStack[0]);
-        Inventory inventory = Bukkit.createInventory(null, 18, SorterGUI.name);
+        Inventory inventory = sides.get(blockFace);
         inventory.setContents(itemStackArray);
         return inventory;
     }
     public void setInventory(BlockFace blockFace, Inventory inventory)
     {
+        sides.put(blockFace, inventory);
         List<ItemStack> saves = new ArrayList<ItemStack>(Arrays.asList(inventory.getContents()));
         if (saves.get(0) == null) saves.set(0, new ItemStack(Material.AIR));
         saveManager.set(blockFace.name() + ".inventory", saves);
