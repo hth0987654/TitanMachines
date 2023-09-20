@@ -20,6 +20,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.UUID;
+
 public class TitanMachineBlockListener extends TitanBlockListener {
     @Override
     public void onPlayerInteract(TitanBlockInteractEvent event) {
@@ -37,6 +39,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                         || itemStack.getType() == Material.GOLDEN_PICKAXE  || itemStack.getType() == Material.IRON_PICKAXE
                         || itemStack.getType() == Material.STONE_PICKAXE  || itemStack.getType() == Material.WOODEN_PICKAXE)
                 {
+                    UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(location);
                     PipesManager.getInstant(PipeTypeEnum.COPPER).remove(location);
                     TitanBlock.breakBlock(titanBlock);
 
@@ -44,6 +47,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                         @Override
                         public void run() {
                             PipesManager.getInstant(PipeTypeEnum.COPPER).checkSurroundings(location);
+                            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
                         }
                     }.runTaskLater(TitanMachines.instants, 1);
                 }
@@ -117,6 +121,9 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                 public void run() {
                     location.getBlock().setType(Material.BARRIER);
                     PipesManager.getInstant(PipeTypeEnum.COPPER).checkSurroundings(location);
+
+                    UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(location);
+                    PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
                 }
             }.runTaskLater(TitanMachines.instants, 1);
         }

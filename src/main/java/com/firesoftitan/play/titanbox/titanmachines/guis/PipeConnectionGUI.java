@@ -214,6 +214,7 @@ public class PipeConnectionGUI {
                 select.remove(player.getUniqueId());
             }
         }
+        PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(s.getGroup());
         AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, s.getLocation(), s.getConnection());
         advancedPipeGUI.open();
 
@@ -235,6 +236,7 @@ public class PipeConnectionGUI {
             PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsType(chest, group, nextSetting);
             PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, pipe);
             pipeConnectionGUI.open();
+            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             PipesManager.getInstant(PipeTypeEnum.COPPER).rescanPipeOrientation(pipe);
 
         }
@@ -256,6 +258,7 @@ public class PipeConnectionGUI {
                     PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.ALL);
                 }
             }
+            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
         }
@@ -266,6 +269,7 @@ public class PipeConnectionGUI {
             {
                 PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.ALL);
             }
+            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
         }
@@ -276,6 +280,7 @@ public class PipeConnectionGUI {
             {
                 PipesManager.getInstant(PipeTypeEnum.COPPER).setChestSettingsFilterType(chest, group, i, PipeChestFilterTypeEnum.DISABLED);
             }
+            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, pipe, chest);
             advancedPipeGUI.open();
         }
@@ -292,9 +297,8 @@ public class PipeConnectionGUI {
             s.setGetter(1);
             select.put(player.getUniqueId(), s);
             if (button == 15) select.remove(player.getUniqueId());
+            PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             pipeConnectionGUI.open();
-
-
         }
 
     }

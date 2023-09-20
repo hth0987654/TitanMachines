@@ -92,7 +92,7 @@ public class SorterGUI {
 
             item = new ItemStack(Material.BARRIER);
             item = TitanMachines.itemStackTool.changeName(item, "Remove chest from sorting");
-            item = TitanMachines.itemStackTool.addLore(item,  ChatColor.AQUA + "Open/Close chest, with item in it, to add again");
+            item = TitanMachines.itemStackTool.addLore(item,  ChatColor.AQUA + "Open/Close chest, with item in it, to addItem again");
             item = TitanMachines.nbtTool.set(item, "button", 16);
             item = TitanMachines.nbtTool.set(item, "location", this.location);
             this.inventory.setItem(16, item.clone());

@@ -25,76 +25,6 @@ public class ContainerManager {
         if (SensibleToolboxSupport.instance.isSupported(location)) return true;
         return SlimefunSupport.instance.isSupported(location);
     }
-    public static ItemStack addToInventory(UUID pipe, Location location, ItemStack itemStack)
-    {
-        Location pipeLocation = JunctionBoxBlock.getPipeLocation(pipe, location);
-        return addToInventory(pipeLocation, location, itemStack);
-    }
-    public static ItemStack addToInventory(Location from, Location location, ItemStack itemStack)
-    {
-        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
-        {
-            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
-            JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-            BlockFace face = location.getBlock().getFace(from.getBlock());
-            if (junctionBoxBlock != null && face != null) {
-                Inventory inventory = junctionBoxBlock.getInventory(face);
-                HashMap<Integer, ItemStack> integerItemStackHashMap = inventory.addItem(itemStack.clone());
-                for (ItemStack itemStack1 : integerItemStackHashMap.values()) {
-                    if (!TitanMachines.itemStackTool.isEmpty(itemStack1)) return itemStack1.clone();
-                }
-                junctionBoxBlock.setInventory(face, inventory);
-            }
-            return null;
-        }
-        if (TitanMachines.itemStackTool.isEmpty(itemStack)) return null;
-
-        if (SensibleToolboxSupport.instance.isSupported(location))
-        {
-            return SensibleToolboxSupport.instance.addStorage(location, itemStack);
-        }
-        if (SlimefunSupport.instance.isSupported(location)) {
-            for(Integer I: SlimefunSupport.instance.getInventorySlots(location))
-            {
-                ItemStack itemInSlot = SlimefunSupport.instance.getItemInSlot(location, I);
-                if (TitanMachines.itemStackTool.isEmpty(itemInSlot))
-                {
-                    SlimefunSupport.instance.setItemInSlot(location, I, itemStack.clone());
-                    return null;
-                }
-                if (TitanMachines.itemStackTool.isItemEqual(itemStack, itemInSlot))
-                {
-                    int amount = itemInSlot.getAmount();
-                    int max = itemInSlot.getMaxStackSize();
-                    int needed = max - amount;
-                    int have = itemStack.getAmount();
-                    if (needed > 0) {
-                        if (have == 0) return itemStack.clone();
-                        if (have > needed) {
-                            itemStack.setAmount(have - needed);
-                            itemInSlot.setAmount(max);
-                            SlimefunSupport.instance.setItemInSlot(location,I, itemInSlot);
-                            return itemStack.clone();
-                        }
-                        itemInSlot.setAmount(amount + have);
-                        SlimefunSupport.instance.setItemInSlot(location,I, itemInSlot);
-                        return null;
-                    }
-                }
-            }
-            return itemStack.clone();
-        }
-        if (location.getBlock().getState() instanceof Container container) {
-            Inventory inventory = container.getInventory();
-            HashMap<Integer, ItemStack> integerItemStackHashMap = inventory.addItem(itemStack.clone());
-            for(ItemStack itemStack1: integerItemStackHashMap.values())
-            {
-                if (!TitanMachines.itemStackTool.isEmpty(itemStack1)) return itemStack1.clone();
-            }
-            return null;
-        }
-        return itemStack.clone();
-    }
     public static boolean hasAvailableSlot(UUID pipe, Location location)
     {
         Location pipeLocation = JunctionBoxBlock.getPipeLocation(pipe, location);
@@ -150,7 +80,7 @@ public class ContainerManager {
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
         {
-            SensibleToolboxSupport.instance.setInventorySlot(location, itemStack);
+            SensibleToolboxSupport.instance.setInventorySlot(location, slot, itemStack);
             return;
         }
         if (SlimefunSupport.instance.isSupported(location)) {
@@ -182,7 +112,7 @@ public class ContainerManager {
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
         {
-            return SensibleToolboxSupport.instance.getInventorySlot(location);
+            return SensibleToolboxSupport.instance.getInventorySlot(location, slot);
         }
         if (SlimefunSupport.instance.isSupported(location)) {
             return SlimefunSupport.instance.getItemInSlot(location, slot);
@@ -222,8 +152,7 @@ public class ContainerManager {
         }
         if (SensibleToolboxSupport.instance.isSupported(chest))
         {
-            out.add(0);
-            return out;
+            return SensibleToolboxSupport.instance.getInventorySlots(chest);
         }
 
         if (SlimefunSupport.instance.isSupported(chest)) {

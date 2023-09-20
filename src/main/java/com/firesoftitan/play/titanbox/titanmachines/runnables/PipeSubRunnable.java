@@ -3,6 +3,7 @@ package com.firesoftitan.play.titanbox.titanmachines.runnables;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
@@ -67,14 +68,8 @@ public class PipeSubRunnable extends BukkitRunnable {
         }
         long startTIme = System.currentTimeMillis();
 
-        Location chestOut = OutChestsInGroup.get(0).clone();
-        if (InChestsInGroup.isEmpty())
-        {
-            OutChestsInGroup.remove(0);
-            InChestsInGroup = PipesManager.getInstant(this.type).getInChestsInGroup(uuid);
-        }
-        else {
-            for (Location chestIn: InChestsInGroup) {
+        for (Location chestOut: OutChestsInGroup) {
+            for (Location chestIn : InChestsInGroup) {
                 List<Integer> chestSettingsFilterAccessSlots = PipesManager.getInstant(this.type).getChestSettingsFilterAccessSlots(chestIn, uuid);
                 long startTImeL = System.currentTimeMillis();
                 for (int k : chestSettingsFilterAccessSlots) {
@@ -86,10 +81,13 @@ public class PipeSubRunnable extends BukkitRunnable {
                 long done = System.currentTimeMillis() - startTImeL;
                 //if (done > 100) System.out.println(uuid + ": " + chestSettingsFilterAccessSlots.size() + ": " + done + ": " + chestOut);
             }
-            InChestsInGroup.clear();
         }
+        this.cancel();
+        done = true;
+        InChestsInGroup.clear();
+
         this.runTime = Math.max(System.currentTimeMillis() - startTIme, this.runTime);
-        if (this.runTime > 1000)
+        if (this.runTime > 1)
             TitanMachines.messageTool.sendMessageSystem("Pipe sub task took to long uuid:" + uuid + ":" + runTime + " ms");
 
     }

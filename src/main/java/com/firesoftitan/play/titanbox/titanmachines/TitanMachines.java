@@ -76,11 +76,13 @@ public final class TitanMachines extends JavaPlugin {
         new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
         new HopperRunnable().runTaskTimer(this, 20, 20);
         new SorterRunnable().runTaskTimer(this, 20, 20);
-        pipeRunnable = new PipeRunnable();
-        pipeRunnable.runTaskTimer(this, 3, 3);
+        //pipeRunnable = new PipeRunnable();
+        //pipeRunnable.runTaskTimer(this, 3, 3);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
         new TPSMonitorRunnable().runTaskTimer(this, 20, 20);
+        new PipeLoaderRunnable().runTaskLater(this, 1);
+
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
         Objects.requireNonNull(this.getCommand("tm")).setTabCompleter(new TabCompleteListener());
@@ -272,7 +274,7 @@ public final class TitanMachines extends JavaPlugin {
         itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Item Sorter");
         itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Sends items to chests,",
                 ChatColor.AQUA + "based on what is already in them.",
-                ChatColor.YELLOW + "Place item in chest, then Shift Right-Click with empty hand, to add chest.",
+                ChatColor.YELLOW + "Place item in chest, then Shift Right-Click with empty hand, to addItem chest.",
                 ChatColor.DARK_RED + "Shift Right-Click chest with empty hand for more options.",
                 ChatColor.GRAY + "*All rejected items go to the chest attached to the hopper.",
                 ChatColor.GRAY + "*Only 1 item can be assigned to each chest.",
@@ -306,7 +308,7 @@ public final class TitanMachines extends JavaPlugin {
                 , ChatColor.GRAY + "Right click for info"
                 , ChatColor.GRAY + "Hold shift and right click to turn on/off"
                 , ChatColor.GRAY + "Plant sapling directly in front of face and make sure machine is on"
-                , ChatColor.GRAY + "Machine will auto gather saplings, but you can hold a sapling in hand and right click to add more");
+                , ChatColor.GRAY + "Machine will auto gather saplings, but you can hold a sapling in hand and right click to addItem more");
 
         itemStack = nbtTool.set(itemStack, "lumberjack", true);
         itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "LUMBERJACK");

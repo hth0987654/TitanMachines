@@ -5,7 +5,9 @@ import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
+import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ItemSorterManager;
+import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -99,7 +101,7 @@ public class JunctionBoxGUI {
                 }
             }
             item = TitanMachines.itemStackTool.changeName(item, ChatColor.YELLOW + "Move this items to: " + ChatColor.GREEN + face);
-            item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Click here to add/remove item from your inventory.", ChatColor.WHITE + "Right click to cancel", ChatColor.YELLOW + "Items: " + ChatColor.GREEN + filterList.size() + "/20");
+            item = TitanMachines.itemStackTool.addLore(item, ChatColor.WHITE + "Click here to addItem/remove item from your inventory.", ChatColor.WHITE + "Right click to cancel", ChatColor.YELLOW + "Items: " + ChatColor.GREEN + filterList.size() + "/20");
             item = addFilterList(face, junctionBoxBlock, item);
             item = TitanMachines.nbtTool.set(item, "button", i);
             item = TitanMachines.nbtTool.set(item, "location", this.location);

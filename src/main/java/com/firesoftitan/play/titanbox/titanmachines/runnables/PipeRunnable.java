@@ -42,7 +42,11 @@ public class PipeRunnable extends BukkitRunnable {
                 pipeRunnableInfo.setRuntime(pipeSubRunnable[index].getRunTime());
             }
             long startTIme = System.currentTimeMillis();
-            if (que_Process.isEmpty()) que_Process.addAll(groups);
+            if (que_Process.isEmpty())
+            {
+                System.out.println("Starting....");
+                que_Process.addAll(groups);
+            }
             if (que_Process.isEmpty()) return;
             UUID uuid = que_Process.get(0);
             que_Process.remove(0);

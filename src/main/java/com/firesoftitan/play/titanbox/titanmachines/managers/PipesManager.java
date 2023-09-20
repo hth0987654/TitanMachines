@@ -6,6 +6,7 @@ import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
+import com.firesoftitan.play.titanbox.titanmachines.infos.PipeLookUpInfo;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Location;
@@ -20,6 +21,7 @@ import java.util.*;
 
 public class PipesManager {
     private static final BlockFace[] blockFaces = {BlockFace.UP, BlockFace.DOWN, BlockFace.SOUTH,BlockFace.NORTH,BlockFace.EAST,BlockFace.WEST};
+    private static final HashMap<UUID, PipeLookUpInfo> lookups = new HashMap<UUID, PipeLookUpInfo>();
     private static final HashMap<PipeTypeEnum, PipesManager> pipeInstants = new HashMap<PipeTypeEnum, PipesManager>();
     public static PipesManager getInstant(PipeTypeEnum type)
     {
@@ -182,7 +184,7 @@ public class PipesManager {
             {
                 hologramConnections.add(blockFace);
                 if (id == null) {
-                    //add pipe to an existing group
+                    //addItem pipe to an existing group
                     id = getGroup(locationToCheck);
                     addToGroup(location, id);
                 }
@@ -414,6 +416,8 @@ public class PipesManager {
                     addConnection(testLocation, location);
                     addChestConnection(testLocation, location);
                 }
+                UUID group = this.getGroup(testLocation);
+                PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
             }
         }
 
@@ -461,11 +465,56 @@ public class PipesManager {
     {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         pipes.set("chest." + key + ".settings." + group + ".filter." + slot + ".type", type.getValue());
+        if (getChestSettingsType(chest, group) == PipeChestTypeEnum.CHEST_IN) createLookupKey(chest, group, slot, type);
     }
+    public PipeLookUpInfo getLookUp(UUID group)
+    {
+        return lookups.get(group);
+    }
+    public void createLookupKey(Location chest, UUID group, int slot, PipeChestFilterTypeEnum type) {
+        PipeLookUpInfo pipeLookUpInfo;
+        if (lookups.containsKey(group)) pipeLookUpInfo =lookups.get(group);
+        else  pipeLookUpInfo = new PipeLookUpInfo(group);
+
+        if (type == PipeChestFilterTypeEnum.ALL)
+        {
+            pipeLookUpInfo.addItem(type, chest, slot);
+        }
+        else if (type != PipeChestFilterTypeEnum.DISABLED)
+        {
+            ItemStack chestSettingsFilter = getChestSettingsFilter(chest, group, slot);
+            pipeLookUpInfo.addItem(type, chestSettingsFilter, chest, slot);
+        }
+        lookups.put(group, pipeLookUpInfo);
+    }
+    private void clearLookupGroup(UUID group)
+    {
+        lookups.remove(group);
+    }
+    public void reScanLookupGroup(UUID group)
+    {
+        clearLookupGroup(group);
+        loadPipeLookupGroup(group);
+    }
+
+    public void loadPipeLookupGroup(UUID group) {
+        List<Location> InChestsInGroup = PipesManager.getInstant(type).getInChestsInGroup(group);
+        for (Location inChest : InChestsInGroup) {
+            List<Integer> chestSettingsFilterAccessSlots = PipesManager.getInstant(type).getChestSettingsFilterAccessSlots(inChest, group);
+            for (int k : chestSettingsFilterAccessSlots) {
+                PipeChestFilterTypeEnum InChestSettingsFilterType = PipesManager.getInstant(type).getChestSettingsFilterType(inChest, group, k);
+                PipesManager.getInstant(type).createLookupKey(inChest, group, k, InChestSettingsFilterType);
+            }
+
+        }
+    }
+
+
     public PipeChestFilterTypeEnum getChestSettingsFilterType(Location chest, UUID group, int slot) {
         String key = TitanMachines.serializeTool.serializeLocation(chest);
         if (!pipes.contains("chest." + key + ".settings." + group + ".filter." + slot + ".type") && slot > 0) return PipeChestFilterTypeEnum.DISABLED;
         int anInt = pipes.getInt("chest." + key + ".settings." + group + ".filter." + slot + ".type");
+
         return PipeChestFilterTypeEnum.getPipeChestType(anInt);
     }
 

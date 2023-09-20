@@ -264,7 +264,7 @@ public class MainListener implements Listener {
 
         if (action == Action.RIGHT_CLICK_BLOCK && itemStackTool.isEmpty(itemStack) && player.isSneaking()) {
             if (clickedBlock != null) {
-                if (SensibleToolboxSupport.instance.isSupported(clickedBlock.getLocation()) || clickedBlock.getState() instanceof Container) {
+                if (SensibleToolboxSupport.instance.isStorage(clickedBlock.getLocation()) || clickedBlock.getState() instanceof Container) {
                     if (LumberjackBlock.getBlock(clickedBlock.getLocation()) != null) return;
                     Location location = clickedBlock.getLocation();
                     //if (ItemSorterManager.instance.hasSorter(location)) {
@@ -300,7 +300,7 @@ public class MainListener implements Listener {
                                 }
                             }
                             TitanMachines.messageTool.sendMessagePlayer((Player) player, "This chest hasn't been set for sorting");
-                            TitanMachines.messageTool.sendMessagePlayer((Player) player, "Place item in chest, to add it.");
+                            TitanMachines.messageTool.sendMessagePlayer((Player) player, "Place item in chest, to addItem it.");
                         }
                     }
 
@@ -439,6 +439,7 @@ public class MainListener implements Listener {
                 @Override
                 public void run() {
                     PipesManager.getInstant(PipeTypeEnum.COPPER).scanPlacedChest(location);
+
                 }
             }.runTaskLater(TitanMachines.instants, 3);
 
@@ -469,7 +470,7 @@ public class MainListener implements Listener {
             if (!ItemSorterManager.instance.hasSorter(event.getPlayer())) {
                 Location clone = location.clone();
                 ItemSorterManager.instance.add(event.getPlayer(), clone);
-                TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Shift click Chest, and other storage with an empty had to add them to sorting.");
+                TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), "Shift click Chest, and other storage with an empty had to addItem them to sorting.");
             }
             else {
                 TitanMachines.messageTool.sendMessagePlayer(event.getPlayer(), ChatColor.RED + "You already have a sorting hopper at: " + ChatColor.WHITE + TitanMachines.formattingTool.formatLocation(ItemSorterManager.instance.getSelector(event.getPlayer())));

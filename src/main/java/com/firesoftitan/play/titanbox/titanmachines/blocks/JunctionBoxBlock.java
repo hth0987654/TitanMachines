@@ -94,7 +94,7 @@ public class JunctionBoxBlock extends TitanBlock {
                 // Duplicate - remove it
                 it.remove();
             } else {
-                // First time seeing this name - add it
+                // First time seeing this name - addItem it
                 if (getFilterType(blockFace, item) != PipeChestFilterTypeEnum.DISABLED) seenNames.add(name);
                 else it.remove();
             }
