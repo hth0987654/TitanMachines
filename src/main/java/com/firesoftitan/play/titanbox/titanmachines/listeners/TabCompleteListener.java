@@ -45,6 +45,7 @@ public class TabCompleteListener implements TabCompleter {
                 commands.add("breaker");
                 commands.add("trash");
                 commands.add("lumberjack");
+                commands.add("mobkiller");
                 commands.add("pipe");
                 commands.add("sorter");
                 commands.add("chunkhopper");

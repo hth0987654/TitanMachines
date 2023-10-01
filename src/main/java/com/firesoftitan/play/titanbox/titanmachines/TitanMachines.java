@@ -82,6 +82,7 @@ public final class TitanMachines extends JavaPlugin {
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
         new TPSMonitorRunnable().runTaskTimer(this, 20, 20);
         new PipeLoaderRunnable().runTaskLater(this, 1);
+        new MobKillerRunnable().runTaskTimer(this, 5, 5);
 
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
@@ -172,6 +173,17 @@ public final class TitanMachines extends JavaPlugin {
                             try {
                                 Player player = Bukkit.getPlayer(args[1]);
                                 ItemStack itemStack = getJunctionBox();
+                                itemStack.setAmount(amount);
+                                player.getInventory().addItem(itemStack.clone());
+                                return true;
+                            } catch (IllegalArgumentException e) {
+
+                            }
+                        }
+                        if (args[2].equals("mobkiller")) {
+                            try {
+                                Player player = Bukkit.getPlayer(args[1]);
+                                ItemStack itemStack = getMobKiller();
                                 itemStack.setAmount(amount);
                                 player.getInventory().addItem(itemStack.clone());
                                 return true;
@@ -281,6 +293,14 @@ public final class TitanMachines extends JavaPlugin {
                 ChatColor.GRAY + "*Supports: Chest, Trap Chest, Barrels, BigStorageUnits, HyperStorageUnits");
         itemStack = nbtTool.set(itemStack, "itemsorter", true);
         itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "ITEM_SORTER");
+        itemStack.setAmount(1);
+        return itemStack;
+    }
+    public ItemStack getMobKiller() {
+        ItemStack itemStack = new ItemStack(Material.GILDED_BLACKSTONE);
+        itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Mob Killer");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Kills all mobs with in 7 blocks");
+        itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "MOB_KILLER_BLOCK");
         itemStack.setAmount(1);
         return itemStack;
     }

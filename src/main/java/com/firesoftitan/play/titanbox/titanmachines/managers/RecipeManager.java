@@ -17,8 +17,24 @@ public class RecipeManager {
         addAreaHopper();
         addTrash();
         addJunctionBox();
+        addMobKiller();
     }
-
+    private void addMobKiller()
+    {
+        ItemStack[] matrix = new ItemStack[9];
+        matrix[0] = new ItemStack(Material.COPPER_INGOT);
+        matrix[1] = new ItemStack(Material.IRON_SWORD);
+        matrix[2] = new ItemStack(Material.COPPER_INGOT);
+        matrix[3] = new ItemStack(Material.IRON_INGOT);
+        matrix[4] = TitanMachines.instants.getBlockBreaker();
+        matrix[5] = new ItemStack(Material.IRON_INGOT);
+        matrix[6] = new ItemStack(Material.COPPER_INGOT);
+        matrix[7] = new ItemStack(Material.REDSTONE);
+        matrix[8] = new ItemStack(Material.COPPER_INGOT);
+        ItemStack partItem = TitanMachines.instants.getMobKiller();
+        partItem.setAmount(1);
+        TitanBlockManager.registerTitanBlock(TitanMachines.instants, partItem, matrix);
+    }
     private void addJunctionBox()
     {
         ItemStack[] matrix = new ItemStack[9];
@@ -29,7 +45,7 @@ public class RecipeManager {
         matrix[4] = new ItemStack(Material.CHEST);
         matrix[5] = TitanMachines.instants.getPipe();
         matrix[6] = new ItemStack(Material.COPPER_INGOT);
-        matrix[7] = new ItemStack(Material.CHEST);
+        matrix[7] = new ItemStack(Material.REDSTONE);
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
         ItemStack partItem = TitanMachines.instants.getJunctionBox();
         partItem.setAmount(1);
@@ -70,13 +86,13 @@ public class RecipeManager {
     private void addChunkHopper() {
         ItemStack[] matrix = new ItemStack[9];
         matrix[0] = new ItemStack(Material.COPPER_INGOT);
-        matrix[1] = TitanMachines.instants.getAreaHopper();
+        matrix[1] = new ItemStack(Material.REDSTONE);
         matrix[2] = new ItemStack(Material.COPPER_INGOT);
         matrix[3] = TitanMachines.instants.getPipe();
         matrix[4] = TitanMachines.instants.getAreaHopper();
         matrix[5] = TitanMachines.instants.getPipe();
         matrix[6] = new ItemStack(Material.COPPER_INGOT);
-        matrix[7] = TitanMachines.instants.getAreaHopper();
+        matrix[7] = new ItemStack(Material.REDSTONE);
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
 
         ItemStack partItem = TitanMachines.instants.getChunkHopper();
@@ -88,7 +104,7 @@ public class RecipeManager {
         matrix[1] = TitanMachines.instants.getChunkHopper();
         matrix[2] = new ItemStack(Material.COPPER_INGOT);
         matrix[3] = TitanMachines.instants.getPipe();
-        matrix[4] = TitanMachines.instants.getPipe();
+        matrix[4] = new ItemStack(Material.REDSTONE);
         matrix[5] = TitanMachines.instants.getPipe();
         matrix[6] = new ItemStack(Material.COPPER_INGOT);
         matrix[7] = TitanMachines.instants.getChunkHopper();
@@ -117,11 +133,11 @@ public class RecipeManager {
 
         ItemStack[] matrix = new ItemStack[9];
         matrix[0] = new ItemStack(Material.COPPER_INGOT);
-        matrix[1] = new ItemStack(Material.REDSTONE);
+        matrix[1] = new ItemStack(Material.IRON_AXE);
         matrix[2] = new ItemStack(Material.COPPER_INGOT);
-        matrix[3] = TitanMachines.instants.getPipe();
-        matrix[4] = new ItemStack(Material.IRON_AXE);
-        matrix[5] = TitanMachines.instants.getPipe();
+        matrix[3] = new ItemStack(Material.IRON_INGOT);
+        matrix[4] = TitanMachines.instants.getBlockBreaker();
+        matrix[5] = new ItemStack(Material.IRON_INGOT);
         matrix[6] = new ItemStack(Material.COPPER_INGOT);
         matrix[7] = new ItemStack(Material.REDSTONE);
         matrix[8] = new ItemStack(Material.COPPER_INGOT);
