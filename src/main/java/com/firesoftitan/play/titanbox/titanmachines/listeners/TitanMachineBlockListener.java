@@ -1,20 +1,28 @@
 package com.firesoftitan.play.titanbox.titanmachines.listeners;
 
+import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockEvent;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockInteractEvent;
 import com.firesoftitan.play.titanbox.libs.listeners.TitanBlockListener;
+import com.firesoftitan.play.titanbox.libs.tools.LibsProtectionTool;
+import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
+import com.firesoftitan.play.titanbox.titanmachines.blocks.MobKillerBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.PipeBlock;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
@@ -30,7 +38,29 @@ public class TitanMachineBlockListener extends TitanBlockListener {
         Location location = event.location();
         Action action = event.action();
         ItemStack itemStack = event.item();
-        if (titanBlock.getTitanID().equals(PipeBlock.titanID))
+        boolean isAllowed = LibsProtectionTool.canPlaceBlock(player, location);
+        if (titanBlock.getTitanID().equals(MobKillerBlock.titanID) && isAllowed)
+        {
+            if (action == Action.RIGHT_CLICK_BLOCK) {
+                MobKillerBlock convert = MobKillerBlock.convert(titanBlock);
+                if (convert != null) {
+                    double amountDMG = 0.5f;
+                    AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+                    if (attribute != null) {
+                        amountDMG = attribute.getValue() / 2f; //this is  the total no need to add.
+                        for (AttributeModifier attributeModifier : attribute.getModifiers()) {
+                            amountDMG = amountDMG + attributeModifier.getAmount() / 2f;
+                        }
+                    }
+                    convert.setDamage(amountDMG);
+                    TitanMachines.messageTool.sendMessagePlayer(player, ChatColor.AQUA + "Damages is not set at " +ChatColor.WHITE + amountDMG *2);
+                    TitanMachines.messageTool.sendMessagePlayer(player, ChatColor.GRAY + "While holding weapon right click block damage will be set");
+                    TitanMachines.messageTool.sendMessagePlayer(player, ChatColor.GRAY + "equal to that weapons and players combined damage");
+                }
+
+            }
+        }
+        if (titanBlock.getTitanID().equals(PipeBlock.titanID) && isAllowed)
         {
             PipesManager.getInstant(PipeTypeEnum.COPPER).rescanPipeOrientation(location);
             if (action == Action.LEFT_CLICK_BLOCK && !TitanMachines.itemStackTool.isEmpty(itemStack))
@@ -52,7 +82,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                     }.runTaskLater(TitanMachines.instants, 1);
                 }
             }
-            if (action == Action.RIGHT_CLICK_BLOCK) {
+            if (action == Action.RIGHT_CLICK_BLOCK && isAllowed) {
                 if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
                 {
                     PipeConnectionGUI pipeConnectionGUI = new PipeConnectionGUI(player, location);
@@ -60,7 +90,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                 }
             }
         }
-        if (titanBlock.getTitanID().equals(JunctionBoxBlock.titanID))
+        if (titanBlock.getTitanID().equals(JunctionBoxBlock.titanID) && isAllowed)
         {
             JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
             if (junctionBoxBlock != null)
@@ -69,7 +99,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                 junctionBoxGUI.open();
             }
         }
-        if (titanBlock.getTitanID().equals(LumberjackBlock.titanID))
+        if (titanBlock.getTitanID().equals(LumberjackBlock.titanID) && isAllowed)
         {
             LumberjackBlock lumberjackBlock = LumberjackBlock.convert(titanBlock);
             if (lumberjackBlock != null)

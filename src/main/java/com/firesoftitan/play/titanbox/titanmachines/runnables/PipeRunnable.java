@@ -26,7 +26,7 @@ public class PipeRunnable extends BukkitRunnable {
     @Override
     public void run() {
 
-        if (!TitanMachines.pipedEnabled) return;
+        if (!TitanMachines.pipedEnabled || TitanMachines.pipedEnabled) return;
         index++;
         List<UUID> groups = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroups();
         int min = Math.min(pipeSubRunnable.length, groups.size());

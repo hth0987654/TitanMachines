@@ -27,6 +27,7 @@ public class PipeRunnable2 extends BukkitRunnable {
 
     @Override
     public void run() {
+        if (!TitanMachines.pipedEnabled || TitanMachines.pipedEnabled) return;
         long startTImeL = System.currentTimeMillis();
         if (groupsQ.isEmpty())
         {

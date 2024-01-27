@@ -6,13 +6,16 @@ import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
+import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AGenerator;
+import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -24,6 +27,13 @@ public class ContainerManager {
         if (location.getBlock().getState() instanceof Container) return true;
         if (SensibleToolboxSupport.instance.isSupported(location)) return true;
         return SlimefunSupport.instance.isSupported(location);
+    }
+    public static boolean isVanilla(Location location)
+    {
+        if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location)) return false;
+        if (SensibleToolboxSupport.instance.isSupported(location)) return false;
+        if (SlimefunSupport.instance.isSupported(location)) return false;
+        return location.getBlock().getState() instanceof Container;
     }
     public static boolean hasAvailableSlot(UUID pipe, Location location)
     {
@@ -64,19 +74,25 @@ public class ContainerManager {
         Location pipeLocation = JunctionBoxBlock.getPipeLocation(pipe, location);
         setInventorySlot(pipeLocation, location, itemStack, slot);
     }
+    public static void setInventorySlot(Location location, ItemStack itemStack, int slot)
+    {
+        setInventorySlot((Location) null, location, itemStack, slot);
+    }
     public static void setInventorySlot(Location from, Location location, ItemStack itemStack, int slot)
     {
         if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
-            JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-            BlockFace face = location.getBlock().getFace(from.getBlock());
-            if (junctionBoxBlock != null && face != null) {
-                Inventory inventory = junctionBoxBlock.getInventory(face);
-                inventory.setItem(slot, itemStack);
-                junctionBoxBlock.setInventory(face, inventory);
+            if (from != null) {
+                TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
+                JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
+                BlockFace face = location.getBlock().getFace(from.getBlock());
+                if (junctionBoxBlock != null && face != null) {
+                    Inventory inventory = junctionBoxBlock.getInventory(face);
+                    inventory.setItem(slot, itemStack);
+                    junctionBoxBlock.setInventory(face, inventory);
+                }
+                return;
             }
-            return;
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
         {
@@ -98,16 +114,22 @@ public class ContainerManager {
         Location pipeLocation = JunctionBoxBlock.getPipeLocation(pipe, location);
         return getInventorySlot(pipeLocation, location, slot);
     }
+    public static ItemStack getInventorySlot(Location location, int slot)
+    {
+        return getInventorySlot((Location)null, location, slot);
+    }
     public static ItemStack getInventorySlot(Location from, Location location, int slot)
     {
         if (TitanBlockManager.isTitanBlock(JunctionBoxBlock.titanID, location))
         {
-            TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
-            JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
-            BlockFace face = location.getBlock().getFace(from.getBlock());
-            if (junctionBoxBlock != null && face != null) {
-                Inventory inventory = junctionBoxBlock.getInventory(face);
-                return inventory.getItem(slot);
+            if (from != null) {
+                TitanBlock titanBlock = TitanBlockManager.getTitanBlock(JunctionBoxBlock.titanID, location);
+                JunctionBoxBlock junctionBoxBlock = JunctionBoxBlock.convert(titanBlock);
+                BlockFace face = location.getBlock().getFace(from.getBlock());
+                if (junctionBoxBlock != null && face != null) {
+                    Inventory inventory = junctionBoxBlock.getInventory(face);
+                    return inventory.getItem(slot);
+                }
             }
         }
         if (SensibleToolboxSupport.instance.isSupported(location))
@@ -122,6 +144,32 @@ public class ContainerManager {
             if (slot < inventory.getSize()) return inventory.getItem(slot);
         }
 
+        return null;
+    }
+    public static int[] getInputSlots(Location location)
+    {
+        SlimefunItem check = BlockStorage.check(location);
+        if (check instanceof AContainer aContainer)
+        {
+            return aContainer.getInputSlots();
+        }
+        if (check instanceof AGenerator aContainer)
+        {
+            return aContainer.getInputSlots();
+        }
+        return null;
+    }
+    public static int[] getOutputSlots(Location location)
+    {
+        SlimefunItem check = BlockStorage.check(location);
+        if (check instanceof AContainer aContainer)
+        {
+            return aContainer.getOutputSlots();
+        }
+        if (check instanceof AGenerator aContainer)
+        {
+            return aContainer.getOutputSlots();
+        }
         return null;
     }
     public static Set<Integer> getInventorySlots(UUID pipe, Location chest)

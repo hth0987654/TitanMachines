@@ -21,5 +21,18 @@ public class MobKillerBlock extends TitanBlock {
         super(saveManager);
     }
 
+    public void setDamage(double damage)
+    {
+        this.saveManager.set("damage", damage);
+        updateBlock(this);
+    }
+    public double getDamage()
+    {
+        double damage = this.saveManager.getDouble("damage");
+        if (damage < 0.5f) damage = 0.5f;
+        return damage;
+    }
+
+
 
 }

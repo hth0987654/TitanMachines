@@ -56,9 +56,9 @@ public class RecipeManager {
         matrix[0] = new ItemStack(Material.COPPER_INGOT);
         matrix[1] = new ItemStack(Material.COPPER_INGOT);
         matrix[2] = new ItemStack(Material.COPPER_INGOT);
-        matrix[3] = new ItemStack(Material.AIR);
-        matrix[4] = new ItemStack(Material.AIR);
-        matrix[5] = new ItemStack(Material.AIR);
+        matrix[3] = new ItemStack(Material.WATER_BUCKET);
+        matrix[4] = new ItemStack(Material.WATER_BUCKET);
+        matrix[5] = new ItemStack(Material.WATER_BUCKET);
         matrix[6] = new ItemStack(Material.COPPER_INGOT);
         matrix[7] = new ItemStack(Material.COPPER_INGOT);
         matrix[8] = new ItemStack(Material.COPPER_INGOT);

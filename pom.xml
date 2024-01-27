@@ -12,12 +12,12 @@
     <name>ProjectName</name>
 
     <properties>
-        <minecraft.api-version>1.19</minecraft.api-version>
-        <minecraft.version>1.20.1</minecraft.version>
-        <java.version>16.0.1</java.version>
+        <minecraft.api-version>1.20</minecraft.api-version>
+        <minecraft.version>1.20.4</minecraft.version>
+        <java.version>18.0.1</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <url>www.firesoftitan.com</url>
+    <url>www.FiresOfTitan.com</url>
 
     <build>
         <plugins>
@@ -99,13 +99,13 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.firesoftitan.play.titanbox.libs</groupId>
             <artifactId>TitanBoxLibs</artifactId>
-            <version>2.7.12</version>
+            <version>2.7.14</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

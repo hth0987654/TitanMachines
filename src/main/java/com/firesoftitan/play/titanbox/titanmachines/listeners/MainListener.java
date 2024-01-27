@@ -20,6 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
@@ -45,6 +46,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockIterator;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class MainListener implements Listener {
@@ -403,13 +405,114 @@ public class MainListener implements Listener {
         ItemStack itemSorter = TitanMachines.instants.getItemSorter();
         if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
     }
+    private int ticks = -1;
+    private HashMap<String, Integer> ticks_Hopper = new HashMap<String, Integer>();
+    @EventHandler()
+    public void  onHopperInventorySearchEvent(HopperInventorySearchEvent event) {
+        Hopper hopper = (Hopper) event.getBlock().getState();
+        String key = TitanMachines.tools.getSerializeTool().serializeLocation(hopper.getLocation());
+        int ticks = 0;
+        if (ticks_Hopper.containsKey(key)) ticks = ticks_Hopper.get(key);
+        if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.SOURCE  && ticks < 0)
+        {
+            Block targetBlock = hopper.getWorld().getBlockAt(hopper.getLocation()).getRelative(BlockFace.UP);
+            if (ContainerManager.isContainer(targetBlock.getLocation()) && !ContainerManager.isVanilla(targetBlock.getLocation())) {
+                int[] inventorySlots = ContainerManager.getOutputSlots(targetBlock.getLocation());
+                Inventory hopperInventory = hopper.getInventory();
+                for (int j = 0; j < inventorySlots.length; j++) {
+                    ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getLocation(), inventorySlots[j]);
+                    if (!TitanMachines.tools.getItemStackTool().isEmpty(inventorySlot))
+                    {
+                        for (int i = 0; i < hopperInventory.getSize(); i++) {
+                            ItemStack itemStack = hopperInventory.getItem(i);
+                            if (TitanMachines.tools.getItemStackTool().isEmpty(itemStack))
+                            {
+                                ItemStack clone = inventorySlot.clone();
+                                clone.setAmount(1);
+                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getLocation(), inventorySlots[j]);
+                                ticks_Hopper.put(key, 8);
+                                return;
+                            }
+                            if (TitanMachines.tools.getItemStackTool().isItemEqual(inventorySlot, itemStack) && itemStack.getAmount() < itemStack.getMaxStackSize()) {
+                                ItemStack clone = itemStack.clone();
+                                clone.setAmount(itemStack.getAmount() + 1);
+                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getLocation(), inventorySlots[j]);
+                                ticks_Hopper.put(key, 8);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.DESTINATION  && ticks < 0)
+        {
+            if (event.getInventory() == null)
+            {
+                org.bukkit.block.data.type.Hopper facing = (org.bukkit.block.data.type.Hopper) hopper.getBlockData();
+                Block targetBlock = hopper.getWorld().getBlockAt(hopper.getLocation()).getRelative(facing.getFacing());
+                if (ContainerManager.isContainer(targetBlock.getLocation()) && !ContainerManager.isVanilla(targetBlock.getLocation())) {
+                    int[] inventorySlots = ContainerManager.getInputSlots(targetBlock.getLocation());
+                    Inventory hopperInventory = hopper.getInventory();
+                    for (int i = 0; i < hopperInventory.getSize(); i++)
+                    {
+                        ItemStack item = hopperInventory.getItem(i);
+                        if (!TitanMachines.tools.getItemStackTool().isEmpty(item))
+                        {
+                            for (int j = 0; j < inventorySlots.length; j++)
+                            {
+                                ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getLocation(), inventorySlots[j]);
+                                if (TitanMachines.tools.getItemStackTool().isEmpty(inventorySlot))
+                                {
+                                    ItemStack clone = item.clone();
+                                    clone.setAmount(1);
+                                    removeFromHopper(item, hopperInventory, i, targetBlock.getLocation(), clone, inventorySlots[j]);
+                                    ticks_Hopper.put(key, 8);
+                                    return;
+                                }
+                                if (TitanMachines.tools.getItemStackTool().isItemEqual(inventorySlot, item) && inventorySlot.getAmount() < inventorySlot.getMaxStackSize())
+                                {
+                                    ItemStack clone = inventorySlot.clone();
+                                    clone.setAmount(inventorySlot.getAmount() + 1);
+                                    removeFromHopper(item, hopperInventory, i, targetBlock.getLocation(), clone, inventorySlots[j]);
+                                    ticks_Hopper.put(key, 8);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+            }
+        }
+        if (ticks > -1) ticks--;
+        ticks_Hopper.put(key, ticks);
+
+    }
+
+    private void AddToHopper(ItemStack inventorySlot, Inventory hopperInventory, int i, ItemStack clone, Location location, int inventorySlots) {
+        int amount = inventorySlot.getAmount() - 1;
+        if (amount == 0) inventorySlot = null;
+        else inventorySlot.setAmount(amount);
+        hopperInventory.setItem(i, clone);
+        ContainerManager.setInventorySlot(location, inventorySlot, inventorySlots);
+    }
+
+    private void removeFromHopper(ItemStack item, Inventory hopperInventory, int i, Location location, ItemStack clone, int inventorySlots) {
+        int amount = item.getAmount() - 1;
+        if (amount == 0) item = null;
+        else item.setAmount(amount);
+        hopperInventory.setItem(i, item);
+        ContainerManager.setInventorySlot(location, clone, inventorySlots);
+        return;
+    }
 
     @EventHandler()
     public void  onInventoryMoveItemEvent(InventoryMoveItemEvent event) {
         Inventory source = event.getSource();
         Location clone = source.getLocation().clone();
         if (ItemSorterManager.instance.isSorter(clone)) event.setCancelled(true);
-
     }
     @EventHandler()
     public void  onInventoryPickupItemEvent(InventoryPickupItemEvent event) {

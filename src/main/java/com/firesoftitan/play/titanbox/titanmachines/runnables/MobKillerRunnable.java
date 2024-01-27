@@ -1,21 +1,24 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
 import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
+import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.managers.WorkerManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.MobKillerBlock;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MobKillerRunnable extends BukkitRunnable {
     private final List<Location> quList = new ArrayList<Location>();
@@ -43,14 +46,19 @@ public class MobKillerRunnable extends BukkitRunnable {
                 time = timedKillList.get(key);
             }
             if (System.currentTimeMillis() - time > 500) {
+                TitanBlock titanBlock = TitanBlockManager.getTitanBlock(location);
+                MobKillerBlock convert = MobKillerBlock.convert(titanBlock);
                 timedKillList.put(key, System.currentTimeMillis());
-                Player worker = TitanBoxLibs.workerManager.getCraftWorker(location);
+                Player worker = TitanBoxLibs.workerManager.getCraftWorker("freethemice", location);
+                double amountDMG = 0.5;
+                if (convert != null) amountDMG = convert.getDamage();
                 List<Entity> nearbyEntities = worker.getNearbyEntities(7, 7, 7);
                 for (Entity entity : nearbyEntities) {
                     if ((entity instanceof Mob livingEntity) && entity.getType() != EntityType.PLAYER) {
-                        livingEntity.damage(0.5f, worker);
+                        livingEntity.damage(amountDMG, worker);
                     }
                 }
+                //worker.getInventory().setItemInMainHand(null);
             }
         }
     }

@@ -51,7 +51,7 @@ public class PipeSubRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (!TitanMachines.pipedEnabled) {
+        if (!TitanMachines.pipedEnabled || TitanMachines.pipedEnabled) {
             done = true;
             this.cancel();
             return;

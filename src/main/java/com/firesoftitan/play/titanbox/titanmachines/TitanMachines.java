@@ -1,5 +1,6 @@
 package com.firesoftitan.play.titanbox.titanmachines;
 
+import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
@@ -14,6 +15,9 @@ import com.firesoftitan.play.titanbox.titanmachines.support.WildStackerSupport;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -299,7 +303,7 @@ public final class TitanMachines extends JavaPlugin {
     public ItemStack getMobKiller() {
         ItemStack itemStack = new ItemStack(Material.GILDED_BLACKSTONE);
         itemStack = itemStackTool.changeName(itemStack, ChatColor.AQUA + "Mob Killer");
-        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Kills all mobs with in 7 blocks");
+        itemStack = itemStackTool.addLore(itemStack, ChatColor.YELLOW + "Kills all mobs with in 7 blocks", ChatColor.AQUA + "While holding weapon right click block damage will be set",  ChatColor.AQUA + "equal to that weapons and players combined damage");
         itemStack = tools.getItemStackTool().setTitanItemID(itemStack, "MOB_KILLER_BLOCK");
         itemStack.setAmount(1);
         return itemStack;
