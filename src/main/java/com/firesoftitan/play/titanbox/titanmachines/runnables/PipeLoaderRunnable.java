@@ -1,11 +1,7 @@
 package com.firesoftitan.play.titanbox.titanmachines.runnables;
 
-import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
-import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -24,7 +20,7 @@ public class PipeLoaderRunnable  extends BukkitRunnable {
             long done = System.currentTimeMillis() - startTImeL;
             System.out.println("Created fast lookups, done: " + done + " ms");
         }
-        new PipeRunnable2(12);
+        new PipeRunnable(12);
     }
 
 

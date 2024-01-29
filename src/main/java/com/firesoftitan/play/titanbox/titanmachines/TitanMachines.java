@@ -44,7 +44,6 @@ public final class TitanMachines extends JavaPlugin {
     public static boolean pipedEnabled = true;
     public static boolean sorterEnabled = true;
     public static boolean hopperEnabled = true;
-    public PipeRunnable pipeRunnable;
     @Override
     public void onEnable() {
         // Plugin startup logic
