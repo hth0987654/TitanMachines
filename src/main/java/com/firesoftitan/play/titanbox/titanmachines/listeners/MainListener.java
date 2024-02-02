@@ -33,6 +33,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -405,7 +406,7 @@ public class MainListener implements Listener {
         ItemStack itemSorter = TitanMachines.instants.getItemSorter();
         if (clone.getWorld() != null) clone.getWorld().dropItem(clone, itemSorter.clone());
     }
-    private int ticks = -1;
+ /*   private int ticks = -1;
     private HashMap<String, Integer> ticks_Hopper = new HashMap<String, Integer>();
     @EventHandler()
     public void  onHopperInventorySearchEvent(HopperInventorySearchEvent event) {
@@ -489,7 +490,7 @@ public class MainListener implements Listener {
         if (ticks > -1) ticks--;
         ticks_Hopper.put(key, ticks);
 
-    }
+    }*/
 
     private void AddToHopper(ItemStack inventorySlot, Inventory hopperInventory, int i, ItemStack clone, Location location, int inventorySlots) {
         int amount = inventorySlot.getAmount() - 1;

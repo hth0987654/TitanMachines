@@ -209,7 +209,7 @@ public class PipesManager {
         addHologram(location, hologramConnections);
 
     }
-    @SuppressWarnings("unused")
+
     public void checkHologram(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
@@ -265,41 +265,6 @@ public class PipesManager {
         }
     }
 
-/*    public void rescanAllPipes()
-    {
-        int i = 0;
-        System.out.println("Starting: Upgrading all pipes to TitanPipes");
-        for(String key: pipes.getKeys("pipes"))
-        {
-            Location location = pipes.getLocation("pipes." + key + ".location");
-            if (location != null)
-            {
-                i++;
-                checkForOldVersion(location);
-            }
-        }
-        System.out.println("Done: Upgrading all pipes to TitanPipes");
-        System.out.println("Found: " + i);
-    }
-    private void checkForOldVersion(Location location)
-    {
-        if (location != null && PipesManager.isPipe(location))
-        {
-            TitanBlock block = TitanBlock.getBlock(location);
-            if (block == null)
-            {
-                PipeBlock titanBlock = new PipeBlock(PipeBlock.titanID, TitanMachines.instants.getPipe(), location);
-                TitanBlockManager.setTitanBlock(titanBlock, location);
-                titanBlock.setup();
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        location.getBlock().setType(Material.BARRIER);
-                    }
-                }.runTaskLater(TitanMachines.instants, 2);
-            }
-        }
-    }*/
     public void checkSurroundings(Location location)
     {
         for(BlockFace blockFace: blockFaces)
@@ -721,8 +686,13 @@ public class PipesManager {
         Set<String> groups = pipes.getKeys("groups");
         for(String key: groups)
         {
-            UUID uuid = UUID.fromString(key);
-            output.add(uuid);
+            try {
+                UUID uuid = UUID.fromString(key);
+                output.add(uuid);
+            } catch (Exception ignored) {
+                pipes.delete(key);
+            }
+
         }
         return output;
     }
@@ -803,6 +773,10 @@ public class PipesManager {
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         return pipes.contains("pipes." + key);
+    }
+    public Set<String> getPipes()
+    {
+        return pipes.getKeys("pipes");
     }
     public void save()
     {
