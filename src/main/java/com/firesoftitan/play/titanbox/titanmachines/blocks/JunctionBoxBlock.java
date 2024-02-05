@@ -159,7 +159,7 @@ public class JunctionBoxBlock extends TitanBlock {
             Location pipe = location.clone().add(blockFace.getModX(), blockFace.getModY(), blockFace.getModZ());
             if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(pipe)) {
                 UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(pipe);
-                if (group.equals(uuid)) return pipe;
+                if (group != null && group.equals(uuid)) return pipe;
             }
         }
         return null;

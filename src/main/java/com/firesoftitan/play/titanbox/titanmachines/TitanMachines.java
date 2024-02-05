@@ -75,14 +75,23 @@ public final class TitanMachines extends JavaPlugin {
 
         for(PipeTypeEnum typeEnum: PipeTypeEnum.values()) {
             new PipesManager(typeEnum);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (String key: PipesManager.getInstant(typeEnum).getPipes())
+                    {
+                        Location location = tools.getSerializeTool().deserializeLocation(key);
+                        PipesManager.getInstant(PipeTypeEnum.COPPER).rescanPipeOrientation(location);
+                    }
+                }
+            }.runTaskLater(this, 20);
+
         }
 
         new LumberjackRunnable().runTaskTimer(this, 20, 20);
         new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
         new HopperRunnable().runTaskTimer(this, 20, 20);
         new SorterRunnable().runTaskTimer(this, 20, 20);
-        //pipeRunnable = new PipeRunnable();
-        //pipeRunnable.runTaskTimer(this, 3, 3);
         new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
         new JunctionBoxRunnable().runTaskTimer(this,5, 5);
         new TPSMonitorRunnable().runTaskTimer(this, 20, 20);
@@ -105,6 +114,15 @@ public final class TitanMachines extends JavaPlugin {
             if (label.equalsIgnoreCase("titanmachines") || label.equalsIgnoreCase("tm")) {
                 if (args.length > 0) {
                     String name = args[0];
+                    if (name.equalsIgnoreCase("check"))
+                    {
+                        PipesManager instant = PipesManager.getInstant(PipeTypeEnum.COPPER);
+                        Location location = ((Player) sender).getLocation();
+                        messageTool.sendMessagePlayer((Player) sender,  instant.isPipe(location) + "");
+                        String key = TitanMachines.serializeTool.serializeLocation(location);
+                        messageTool.sendMessagePlayer((Player) sender,  key );
+                        return true;
+                    }
                     if (name.equalsIgnoreCase("tps"))
                     {
                         messageTool.sendMessagePlayer((Player) sender, ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "-------------------------------");

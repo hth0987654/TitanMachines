@@ -47,7 +47,7 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                     double amountDMG = 0.5f;
                     AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
                     if (attribute != null) {
-                        amountDMG = attribute.getValue() / 2f; //this is  the total no need to add.
+                        amountDMG = attribute.getValue() / 2f; //this is the total no need to add.
                         for (AttributeModifier attributeModifier : attribute.getModifiers()) {
                             amountDMG = amountDMG + attributeModifier.getAmount() / 2f;
                         }

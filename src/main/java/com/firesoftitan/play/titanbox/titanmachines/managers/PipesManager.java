@@ -60,11 +60,10 @@ public class PipesManager {
         String key = TitanMachines.serializeTool.serializeLocation(location);
         UUID id = getGroup(location);
         deleteGroup(id);
-        removeConnection(location); //removes chest to
+        removeConnection(location); //removes chest
         UUID HGuuid = pipes.getUUID("pipes." + key + ".hologram");
         UUID HGuuid2 = pipes.getUUID("pipes." + key + ".hologram2");
-        pipes.delete("pipes." + key);
-
+        deletePipe(key);
         if (HGuuid != null) {
             HologramManager hologram = TitanMachines.hologramTool.getHologram(HGuuid);
             TitanMachines.hologramTool.removeHologram(hologram);
@@ -73,6 +72,16 @@ public class PipesManager {
             HologramManager hologram = TitanMachines.hologramTool.getHologram(HGuuid2);
             TitanMachines.hologramTool.removeHologram(hologram);
         }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                List<HologramManager> holograms = TitanMachines.hologramTool.getHolograms(location);
+                for (HologramManager hologramManager: holograms)
+                {
+                    hologramManager.delete();
+                }
+            }
+        }.runTaskLater(TitanMachines.instants, 10);
 
         long start = System.currentTimeMillis();
         List<UUID> taken = new ArrayList<UUID>();
@@ -98,6 +107,14 @@ public class PipesManager {
         cleanSave();
         long passed = System.currentTimeMillis() - start;
         if (passed > 100) TitanMachines.messageTool.sendMessageSystem("pipe break: " + passed);
+    }
+    private void deletePipe(String key) {
+        if (pipes.contains("pipes." + key)) {
+            for (String subKey : pipes.getKeys("pipes." + key)) {
+                pipes.delete("pipes." + key + "." + subKey);
+            }
+            pipes.delete("pipes." + key);
+        }
     }
 
     private void cleanSave() {
@@ -216,7 +233,7 @@ public class PipesManager {
         UUID uuid = pipes.getUUID("pipes." + key + ".hologram");
         UUID uuid2 = pipes.getUUID("pipes." + key + ".hologram2");
         HologramManager hologram = TitanMachines.hologramTool.getHologram(uuid);
-        if (hologram == null || hologram.getArmorStand() == null || hologram.getArmorStand().isDead())
+        if (hologram == null)
         {
             if (uuid != null) {
                 hologram = TitanMachines.hologramTool.getHologram(uuid);
@@ -294,6 +311,11 @@ public class PipesManager {
     public void rescanPipeOrientation(Location location)
     {
         String key = TitanMachines.serializeTool.serializeLocation(location);
+        if (!pipes.contains("pipes." + key + ".location"))
+        {
+            deletePipe(key);
+            return;
+        }
         UUID uuid = pipes.getUUID("pipes." + key + ".hologram");
         UUID uuid2 = pipes.getUUID("pipes." + key + ".hologram2");
         List<BlockFace> hologramConnections = new ArrayList<BlockFace>();
@@ -311,7 +333,7 @@ public class PipesManager {
         HologramManager hologramManager = null;
 
         if (uuid != null) hologramManager= TitanMachines.hologramTool.getHologram(uuid);
-        if (hologramManager == null || hologramManager.getArmorStand() == null || hologramManager.getArmorStand().isDead()) hologramManager = TitanMachines.hologramTool.addHologram(location.clone().add(0.5f, 0, 0.5f));
+        if (hologramManager == null) hologramManager = TitanMachines.hologramTool.addHologram(location.clone().add(0.5f, 0, 0.5f));
         if (hologramManager != null)
         {
             hologramManager.setEquipment(EquipmentSlot.HEAD, TitanMachines.instants.getPipe(modelNumber));
@@ -336,7 +358,7 @@ public class PipesManager {
             Location holoLoc = location.clone().add(0.5f, 0, 0.5f);
             HologramManager hologram = null;
             if (uuid2 != null) hologram = TitanMachines.hologramTool.getHologram(uuid2);
-            if (hologram == null || hologram.getArmorStand() == null || hologram.getArmorStand().isDead()) hologram = TitanMachines.hologramTool.addHologram(holoLoc);
+            if (hologram == null) hologram = TitanMachines.hologramTool.addHologram(holoLoc);
             hologram.setEquipment(EquipmentSlot.HEAD, pipeHead);
 
             pipes.set("pipes." + key + ".hologram2", hologram.getUUID());

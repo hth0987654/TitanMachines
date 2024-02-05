@@ -1,5 +1,6 @@
 package com.firesoftitan.play.titanbox.titanmachines.managers;
 
+import com.firesoftitan.play.titanbox.libs.enums.ArmorStandPoseEnum;
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import org.bukkit.Chunk;
@@ -104,13 +105,12 @@ public class ContainerVisualManager {
         if (hologramManager == null) {
             hologramManager = TitanMachines.hologramTool.addHologram(displayLoc.clone().add(0,200, 0));
         }
-        if (blockFace != BlockFace.DOWN && blockFace != BlockFace.UP) hologramManager.getArmorStand().setRightArmPose(new EulerAngle(Math.PI/2, 0, Math.PI));
-
-        else hologramManager.getArmorStand().setRightArmPose(new EulerAngle(0, 0, 0));
+        if (blockFace != BlockFace.DOWN && blockFace != BlockFace.UP) hologramManager.setEquipmentAngles(ArmorStandPoseEnum.RIGHT_ARM, new EulerAngle(Math.PI/2, 0, Math.PI));
+        else hologramManager.setEquipmentAngles(ArmorStandPoseEnum.RIGHT_ARM, new EulerAngle(0, 0, 0));
+        displayLoc.setPitch(0);
+        displayLoc.setYaw(yaw);
         hologramManager.setLocation(displayLoc);
-        hologramManager.getArmorStand().setRotation(yaw, 0);
         hologramManager.setEquipment(EquipmentSlot.HAND, this.itemStack);
-        //if (this.itemStack.hasItemMeta() && this.itemStack.getItemMeta().hasDisplayName()) hologramManager.setText(this.itemStack.getItemMeta().getDisplayName());
 
     }
     private Location getOffset(BlockFace blockFace, Location location)
