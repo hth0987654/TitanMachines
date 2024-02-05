@@ -1,6 +1,7 @@
 package com.firesoftitan.play.titanbox.titanmachines;
 
 import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
+import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
@@ -118,9 +119,13 @@ public final class TitanMachines extends JavaPlugin {
                     {
                         PipesManager instant = PipesManager.getInstant(PipeTypeEnum.COPPER);
                         Location location = ((Player) sender).getLocation();
-                        messageTool.sendMessagePlayer((Player) sender,  instant.isPipe(location) + "");
+                        boolean pipe = instant.isPipe(location);
+                        messageTool.sendMessagePlayer((Player) sender,  pipe + "");
                         String key = TitanMachines.serializeTool.serializeLocation(location);
                         messageTool.sendMessagePlayer((Player) sender,  key );
+                        HologramManager hologramManager = HologramManager.getHologramManager(location);
+                        messageTool.sendMessagePlayer((Player) sender,  (hologramManager != null) + "");
+                        if (hologramManager != null && !pipe) hologramManager.delete();
                         return true;
                     }
                     if (name.equalsIgnoreCase("tps"))

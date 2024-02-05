@@ -27,6 +27,7 @@ public class PipeRunnable extends BukkitRunnable {
     }
 
     private List<UUID> tookLong = new ArrayList<UUID>();
+    private HashMap<String, Integer> keeperofAll = new HashMap<String, Integer>();
     @Override
     public void run() {
         if (!TitanMachines.pipedEnabled) return;
@@ -50,7 +51,15 @@ public class PipeRunnable extends BukkitRunnable {
             if (lookUp != null) {
                 List<Location> OutChestsInGroup = copperPipes.getOutChestsInGroup(group);
                 for (Location outLocation : OutChestsInGroup) {
-                    for (int i : ContainerManager.getInventorySlots(group, outLocation)) {
+                    List<Integer> intSlotsN = new ArrayList<Integer>(ContainerManager.getInventorySlots(group, outLocation));
+                    int x = 0;
+                    String key = TitanMachines.serializeTool.serializeLocation(outLocation) + group.toString();
+                    if (keeperofAll.containsKey(key)) x = keeperofAll.get(key);
+                    for(int j = x; j < intSlotsN.size(); j++)
+                    {
+                        int i = intSlotsN.get(j);
+/*                    }
+                    for (int i : ContainerManager.getInventorySlots(group, outLocation)) {*/
                         PipeChestFilterTypeEnum OutChestSettingsFilterType = copperPipes.getChestSettingsFilterType(outLocation, group, i);
                         if (OutChestSettingsFilterType == PipeChestFilterTypeEnum.ALL) {
                             ItemStack item = ContainerManager.getInventorySlot(group, outLocation, i);
@@ -61,8 +70,11 @@ public class PipeRunnable extends BukkitRunnable {
                                 boolean checkAndMove2 = checkAndMove(group, outLocation, i, lookUp, match, item);
                                 match = PipeChestFilterTypeEnum.ALL;
                                 boolean checkAndMove3 = checkAndMove(group, outLocation, i, lookUp, match, item);
-                                if (checkAndMove || checkAndMove2 || checkAndMove3)
+                                if (checkAndMove || checkAndMove2 || checkAndMove3) {
+                                    keeperofAll.put(key, j + 1);
+                                    if (j + 1 >= intSlotsN.size()) keeperofAll.remove(key);
                                     break;//makes it less laggy and work as a hopper would
+                                }
                             }
                         }
                         if (OutChestSettingsFilterType == PipeChestFilterTypeEnum.MATERIAL_ONLY) {
@@ -76,8 +88,11 @@ public class PipeRunnable extends BukkitRunnable {
                                     boolean checkAndMove2 = checkAndMove(group, outLocation, i, lookUp, match, item);
                                     match = PipeChestFilterTypeEnum.ALL;
                                     boolean checkAndMove3 = checkAndMove(group, outLocation, i, lookUp, match, item);
-                                    if (checkAndMove || checkAndMove2 || checkAndMove3)
+                                    if (checkAndMove || checkAndMove2 || checkAndMove3) {
+                                        keeperofAll.put(key, j + 1);
+                                        if (j + 1 >= intSlotsN.size()) keeperofAll.remove(key);
                                         break;//makes it less laggy and work as a hopper would
+                                    }
                                 }
                             }
                         }
@@ -92,8 +107,11 @@ public class PipeRunnable extends BukkitRunnable {
                                     boolean checkAndMove2 = checkAndMove(group, outLocation, i, lookUp, match, item);
                                     match = PipeChestFilterTypeEnum.ALL;
                                     boolean checkAndMove3 = checkAndMove(group, outLocation, i, lookUp, match, item);
-                                    if (checkAndMove || checkAndMove2 || checkAndMove3)
+                                    if (checkAndMove || checkAndMove2 || checkAndMove3) {
+                                        keeperofAll.put(key, j + 1);
+                                        if (j + 1 >= intSlotsN.size()) keeperofAll.remove(key);
                                         break;//makes it less laggy and work as a hopper would
+                                    }
                                 }
                             }
                         }
@@ -106,6 +124,7 @@ public class PipeRunnable extends BukkitRunnable {
             if (selftimer > 100)
             {
                 if (!tookLong.contains(group)) tookLong.add(group);
+
                 //TitanMachines.messageTool.sendMessageSystem(selftimer + " " + group);
             }
             if (tookLong.contains(group)) break;

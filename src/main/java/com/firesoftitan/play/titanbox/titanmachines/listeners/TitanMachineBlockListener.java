@@ -5,6 +5,7 @@ import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockEvent;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockInteractEvent;
 import com.firesoftitan.play.titanbox.libs.listeners.TitanBlockListener;
+import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.tools.LibsProtectionTool;
 import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
@@ -80,6 +81,13 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                             PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
                         }
                     }.runTaskLater(TitanMachines.instants, 1);
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            HologramManager hologramManager = HologramManager.getHologramManager(location);
+                            if (hologramManager != null)hologramManager.delete();
+                        }
+                    }.runTaskLater(TitanMachines.instants, 20);
                 }
             }
             if (action == Action.RIGHT_CLICK_BLOCK && isAllowed) {
