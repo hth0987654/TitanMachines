@@ -6,6 +6,7 @@ import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
+import com.firesoftitan.play.titanbox.titanmachines.runnables.PipeRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,6 +16,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,33 +62,9 @@ public class PipeConnectionGUI {
         {
             this.inventory.setItem(i, borderItem.clone());
         }
-        ItemStack item = null;
+        ItemStack item;
 
-        item = new ItemStack(Material.MANGROVE_SIGN);
-        item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Pipe Info");
-        List<String> lore = new ArrayList<String>();
-        lore.add(ChatColor.AQUA + "Pipe Line ID: " + ChatColor.WHITE + this.group);
-        lore.add(ChatColor.AQUA + "Pipe Line Segments: " + ChatColor.WHITE + PipesManager.getInstant(PipeTypeEnum.COPPER).getGroupSize(this.group));
-        for(Location location: connections)
-        {
-            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
-            {
-                lore.add(ChatColor.AQUA + "Connected to pipe" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
-            }
-            else if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(location))
-            {
-                lore.add(ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
-            }
-            else
-            {
-                lore.add(ChatColor.AQUA + "Connected to Unknown" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
-            }
-        }
-        item = TitanMachines.itemStackTool.addLore(item,  lore);
-        item = TitanMachines.nbtTool.set(item, "button", -1);
-        item = TitanMachines.nbtTool.set(item, "location", this.location);
-        item = TitanMachines.nbtTool.set(item, "group", group);
-        this.inventory.setItem(0, item.clone());
+        updateSignInfo();
 
         for(int i = 1; i < connections.size() + 1; i++)
         {
@@ -113,7 +91,7 @@ public class PipeConnectionGUI {
                     item = TitanMachines.tools.getSkullTool().getSkull(skullTexture);
 
                 }
-
+                if (TitanMachines.itemStackTool.isEmpty(item)) item = new ItemStack(Material.BARRIER);
                 item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
                 PipeChestTypeEnum chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsType(location, group);
                 item = TitanMachines.itemStackTool.addLore(item,  ChatColor.YELLOW + "Type: " + ChatColor.GREEN + chestSettingsType.getCaption(),ChatColor.AQUA + "Left-Click: " + ChatColor.WHITE + "Change connection type",ChatColor.AQUA + "Right-Click: " + ChatColor.WHITE + "Open Advanced Inventory Settings");
@@ -189,11 +167,87 @@ public class PipeConnectionGUI {
 
     }
 
+    public void updateSignInfo() {
+        ItemStack item;
+        item = new ItemStack(Material.MANGROVE_SIGN);
+        item = TitanMachines.itemStackTool.changeName(item, ChatColor.AQUA + "Pipe Info");
+        List<String> lore = new ArrayList<String>();
+        int threadMax = PipeRunnable.instance.getMax();
+        lore.add(ChatColor.AQUA + "Pipe Line ID: " + ChatColor.WHITE + this.group);
+        lore.add(ChatColor.AQUA + "Pipe Line Segments: " + ChatColor.WHITE + PipesManager.getInstant(PipeTypeEnum.COPPER).getGroupSize(this.group));
+        for(Location location: connections)
+        {
+            if (PipesManager.getInstant(PipeTypeEnum.COPPER).isPipe(location))
+            {
+                lore.add(ChatColor.AQUA + "Connected to pipe" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
+            }
+            else if (PipesManager.getInstant(PipeTypeEnum.COPPER).isChestConnected(location))
+            {
+                lore.add(ChatColor.AQUA + "Connected to container" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
+            }
+            else
+            {
+                lore.add(ChatColor.AQUA + "Connected to Unknown" + ChatColor.YELLOW +" @ " + ChatColor.WHITE + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ());
+            }
+        }
+
+        item = TitanMachines.itemStackTool.addLore(item,  lore);
+        item = TitanMachines.nbtTool.set(item, "button", -1);
+        item = TitanMachines.nbtTool.set(item, "location", this.location);
+        item = TitanMachines.nbtTool.set(item, "group", group);
+        this.inventory.setItem(0, item.clone());
+        lore.clear();
+        item = new ItemStack(Material.BAMBOO_SIGN);
+        item = TitanMachines.itemStackTool.changeName(item, ChatColor.GREEN + "Network Info");
+        lore.add(ChatColor.GREEN + "Pipe Segments: " + ChatColor.WHITE + PipeRunnable.instance.getNumberGroups());
+        String tpsData = TitanMachines.tools.getFormattingTool().formatCommas(PipeRunnable.instance.getTPS());
+        if (!PipeRunnable.instance.isTPSReady()) tpsData = "calculating...";
+        lore.add(ChatColor.GREEN + "TPS: " + ChatColor.WHITE + tpsData);
+        long time = PipeRunnable.instance.getTime(group);
+        if (time == 0)
+        {
+            lore.add(ChatColor.GREEN + "Last Ran: " + ChatColor.WHITE + "never");
+        }
+        else
+        {
+            String number = TitanMachines.tools.getFormattingTool().formatTimeFromNow(time);
+            lore.add(ChatColor.GREEN + "Last Ran: " + ChatColor.WHITE + number);
+        }
+        long ltime = PipeRunnable.instance.getLastTimeRan(group);
+        if (ltime == 0)
+        {
+            lore.add(ChatColor.GREEN + "Runs every: " + ChatColor.WHITE + "calculating...");
+        }
+        else
+        {
+            ltime /= 1000L;
+            lore.add(ChatColor.GREEN + "Runs every: " + ChatColor.WHITE + ltime + " Seconds");
+        }
+        lore.add(ChatColor.GREEN + "Running Threads: " + ChatColor.WHITE + threadMax + ChatColor.GREEN + "/" +  ChatColor.WHITE + PipeRunnable.instance.getMaxThreads());
+
+        item = TitanMachines.itemStackTool.addLore(item,  lore);
+        item = TitanMachines.nbtTool.set(item, "button", -1);
+        item = TitanMachines.nbtTool.set(item, "location", this.location);
+        item = TitanMachines.nbtTool.set(item, "group", group);
+        this.inventory.setItem(9, item.clone());
+    }
+
 
     public void open()
     {
         this.render();
         this.player.openInventory(this.inventory);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.getOpenInventory().getTitle().equals(PipeConnectionGUI.name))
+                {
+                    this.cancel();
+                    return;
+                }
+                updateSignInfo();
+            }
+        }.runTaskTimer(TitanMachines.instants, 20, 1);
     }
 
     private static final HashMap<UUID, SelectorGUI> select = new HashMap<UUID, SelectorGUI>();

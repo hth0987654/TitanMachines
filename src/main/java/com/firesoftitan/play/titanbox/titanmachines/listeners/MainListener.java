@@ -411,17 +411,17 @@ public class MainListener implements Listener {
     @EventHandler()
     public void  onHopperInventorySearchEvent(HopperInventorySearchEvent event) {
         Hopper hopper = (Hopper) event.getBlock().getState();
-        String key = TitanMachines.tools.getSerializeTool().serializeLocation(hopper.getLocation());
+        String key = TitanMachines.tools.getSerializeTool().serializeLocation(hopper.getCurrentLocation());
         int ticks = 0;
         if (ticks_Hopper.containsKey(key)) ticks = ticks_Hopper.get(key);
         if (event.getContainerType() == HopperInventorySearchEvent.ContainerType.SOURCE  && ticks < 0)
         {
-            Block targetBlock = hopper.getWorld().getBlockAt(hopper.getLocation()).getRelative(BlockFace.UP);
-            if (ContainerManager.isContainer(targetBlock.getLocation()) && !ContainerManager.isVanilla(targetBlock.getLocation())) {
-                int[] inventorySlots = ContainerManager.getOutputSlots(targetBlock.getLocation());
+            Block targetBlock = hopper.getWorld().getBlockAt(hopper.getCurrentLocation()).getRelative(BlockFace.UP);
+            if (ContainerManager.isContainer(targetBlock.getCurrentLocation()) && !ContainerManager.isVanilla(targetBlock.getCurrentLocation())) {
+                int[] inventorySlots = ContainerManager.getOutputSlots(targetBlock.getCurrentLocation());
                 Inventory hopperInventory = hopper.getInventory();
                 for (int j = 0; j < inventorySlots.length; j++) {
-                    ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getLocation(), inventorySlots[j]);
+                    ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getCurrentLocation(), inventorySlots[j]);
                     if (!TitanMachines.tools.getItemStackTool().isEmpty(inventorySlot))
                     {
                         for (int i = 0; i < hopperInventory.getSize(); i++) {
@@ -430,14 +430,14 @@ public class MainListener implements Listener {
                             {
                                 ItemStack clone = inventorySlot.clone();
                                 clone.setAmount(1);
-                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getLocation(), inventorySlots[j]);
+                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getCurrentLocation(), inventorySlots[j]);
                                 ticks_Hopper.put(key, 8);
                                 return;
                             }
                             if (TitanMachines.tools.getItemStackTool().isItemEqual(inventorySlot, itemStack) && itemStack.getAmount() < itemStack.getMaxStackSize()) {
                                 ItemStack clone = itemStack.clone();
                                 clone.setAmount(itemStack.getAmount() + 1);
-                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getLocation(), inventorySlots[j]);
+                                AddToHopper(inventorySlot, hopperInventory, i, clone, targetBlock.getCurrentLocation(), inventorySlots[j]);
                                 ticks_Hopper.put(key, 8);
                                 return;
                             }
@@ -451,9 +451,9 @@ public class MainListener implements Listener {
             if (event.getInventory() == null)
             {
                 org.bukkit.block.data.type.Hopper facing = (org.bukkit.block.data.type.Hopper) hopper.getBlockData();
-                Block targetBlock = hopper.getWorld().getBlockAt(hopper.getLocation()).getRelative(facing.getFacing());
-                if (ContainerManager.isContainer(targetBlock.getLocation()) && !ContainerManager.isVanilla(targetBlock.getLocation())) {
-                    int[] inventorySlots = ContainerManager.getInputSlots(targetBlock.getLocation());
+                Block targetBlock = hopper.getWorld().getBlockAt(hopper.getCurrentLocation()).getRelative(facing.getFacing());
+                if (ContainerManager.isContainer(targetBlock.getCurrentLocation()) && !ContainerManager.isVanilla(targetBlock.getCurrentLocation())) {
+                    int[] inventorySlots = ContainerManager.getInputSlots(targetBlock.getCurrentLocation());
                     Inventory hopperInventory = hopper.getInventory();
                     for (int i = 0; i < hopperInventory.getSize(); i++)
                     {
@@ -462,12 +462,12 @@ public class MainListener implements Listener {
                         {
                             for (int j = 0; j < inventorySlots.length; j++)
                             {
-                                ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getLocation(), inventorySlots[j]);
+                                ItemStack inventorySlot = ContainerManager.getInventorySlot(targetBlock.getCurrentLocation(), inventorySlots[j]);
                                 if (TitanMachines.tools.getItemStackTool().isEmpty(inventorySlot))
                                 {
                                     ItemStack clone = item.clone();
                                     clone.setAmount(1);
-                                    removeFromHopper(item, hopperInventory, i, targetBlock.getLocation(), clone, inventorySlots[j]);
+                                    removeFromHopper(item, hopperInventory, i, targetBlock.getCurrentLocation(), clone, inventorySlots[j]);
                                     ticks_Hopper.put(key, 8);
                                     return;
                                 }
@@ -475,7 +475,7 @@ public class MainListener implements Listener {
                                 {
                                     ItemStack clone = inventorySlot.clone();
                                     clone.setAmount(inventorySlot.getAmount() + 1);
-                                    removeFromHopper(item, hopperInventory, i, targetBlock.getLocation(), clone, inventorySlots[j]);
+                                    removeFromHopper(item, hopperInventory, i, targetBlock.getCurrentLocation(), clone, inventorySlots[j]);
                                     ticks_Hopper.put(key, 8);
                                     return;
                                 }

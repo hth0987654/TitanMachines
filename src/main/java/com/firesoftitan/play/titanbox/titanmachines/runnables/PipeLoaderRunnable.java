@@ -20,7 +20,7 @@ public class PipeLoaderRunnable  extends BukkitRunnable {
             long done = System.currentTimeMillis() - startTImeL;
             System.out.println("Created fast lookups, done: " + done + " ms");
         }
-        new PipeRunnable(12);
+        new PipeRunnable(10);
     }
 
 

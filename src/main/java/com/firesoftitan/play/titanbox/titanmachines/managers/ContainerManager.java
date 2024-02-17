@@ -4,6 +4,7 @@ import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
+import com.firesoftitan.play.titanbox.titanmachines.infos.InOutBoundInfo;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -108,6 +109,10 @@ public class ContainerManager {
             if (slot < inventory.getSize()) inventory.setItem(slot, itemStack);
         }
 
+    }
+    public static ItemStack getInventorySlot(InOutBoundInfo info)
+    {
+        return getInventorySlot(info.getGroup(), info.getCurrentLocation(), info.getCurrentSlot());
     }
     public static ItemStack getInventorySlot(UUID pipe, Location location, int slot)
     {

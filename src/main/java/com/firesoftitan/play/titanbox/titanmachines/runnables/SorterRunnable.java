@@ -84,21 +84,16 @@ public class SorterRunnable extends BukkitRunnable {
                         List<Location> containerMaterials = ItemSorterManager.instance.getSortingContainer(location, item.getType());
                         inventory.setItem(i, null);
                         if (containerItems != null && !containerItems.isEmpty()) {
-                            sortItems(item, inventory, goingTo, containerItems, 1);
-                        }else if (containerMaterials != null && !containerMaterials.isEmpty())
-                        {
-                            sortItems(item, inventory, goingTo, containerMaterials, 2);
+                            item = sortItems(item, inventory, goingTo, containerItems, 1);
                         }
-                        else
+                        if (containerMaterials != null && !containerMaterials.isEmpty())
                         {
-                            if (goingTo != null)
-                            {
-                                goingTo.addItem(item);
-                            }
-                            else {
-                                world.dropItem(hopper.getLocation().clone().subtract(0,1,0), item);
-                            }
+                            item = sortItems(item, inventory, goingTo, containerMaterials, 2);
                         }
+
+                        item = addItem(goingTo, item);// adds leftovers to an output chest on hopper
+                        item = addItem(inventory, item);// adds leftovers to back to hopper
+                        if (!TitanMachines.tools.getItemStackTool().isEmpty(item)) world.dropItem(location, item); //drops any leftovers
                     }
                 }
 
@@ -109,9 +104,8 @@ public class SorterRunnable extends BukkitRunnable {
             TitanMachines.messageTool.sendMessageSystem("Sorter took to long:" + key + ":" + doneTime + " ms");
     }
 
-    private void sortItems(ItemStack item, Inventory hopper, Inventory outputChest, List<Location> containerItems, int sortingT) {
+    private ItemStack sortItems(ItemStack item, Inventory hopper, Inventory outputChest, List<Location> containerItems, int sortingT) {
         Location location = hopper.getLocation();
-        World world = location.getWorld();
         for (Location sortLocation: containerItems) {
             int sortingType = ItemSorterManager.instance.getSettingsSortingType(location, sortLocation);
             if (sortingType > 0 && sortingT == sortingType) {
@@ -124,12 +118,11 @@ public class SorterRunnable extends BukkitRunnable {
                         item = addItem(sortLocation, item);
                     }
                 }
-                if (TitanMachines.tools.getItemStackTool().isEmpty(item)) return;
+                if (TitanMachines.tools.getItemStackTool().isEmpty(item)) return null;
             }
         }
-        item = addItem(outputChest, item);// adds leftovers to an output chest on hopper
-        item = addItem(hopper, item);// adds leftovers to back to hopper
-        if (!TitanMachines.tools.getItemStackTool().isEmpty(item)) world.dropItem(location, item); //drops any leftovers
+
+        return item;
     }
     public ItemStack addItem(Location location, ItemStack itemStack)
     {
