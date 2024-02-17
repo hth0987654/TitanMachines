@@ -199,7 +199,7 @@ public class PipeConnectionGUI {
         lore.clear();
         item = new ItemStack(Material.BAMBOO_SIGN);
         item = TitanMachines.itemStackTool.changeName(item, ChatColor.GREEN + "Network Info");
-        lore.add(ChatColor.GREEN + "Pipe Segments: " + ChatColor.WHITE + PipeRunnable.instance.getNumberGroups());
+        lore.add(ChatColor.GREEN + "Pipe Networks: " + ChatColor.WHITE + PipeRunnable.instance.getNumberGroups());
         String tpsData = TitanMachines.tools.getFormattingTool().formatCommas(PipeRunnable.instance.getTPS());
         if (!PipeRunnable.instance.isTPSReady()) tpsData = "calculating...";
         lore.add(ChatColor.GREEN + "TPS: " + ChatColor.WHITE + tpsData);
