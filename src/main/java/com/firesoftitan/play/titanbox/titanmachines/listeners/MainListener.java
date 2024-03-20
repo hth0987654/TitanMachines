@@ -75,6 +75,7 @@ public class MainListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerMoveEvent(PlayerMoveEvent event)
     {
+        
         Player player = event.getPlayer();
         if (ItemSorterManager.instance.hasSorter(player)) {
             Block targetBlock = getTargetBlock(player, 7);
@@ -116,6 +117,7 @@ public class MainListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onEntitySpawnEvent(EntitySpawnEvent event)
     {
+        
         if (event.getEntityType() == EntityType.DROPPED_ITEM)
         {
             Location location = event.getLocation();
@@ -314,7 +316,7 @@ public class MainListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void  onBlockBreakEvent(BlockBreakEvent event) {
-
+        
         Block block = event.getBlock();
         Location clone = block.getLocation().clone();
 
@@ -522,6 +524,7 @@ public class MainListener implements Listener {
     }
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void  onBlockPlaceEvent(BlockPlaceEvent event) {
+        
         ItemStack itemInHand = event.getItemInHand();
         Block block = event.getBlock();
         Location location = block.getLocation();

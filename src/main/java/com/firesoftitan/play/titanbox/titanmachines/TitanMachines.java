@@ -1,6 +1,5 @@
 package com.firesoftitan.play.titanbox.titanmachines;
 
-import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.managers.TitanBlockManager;
 import com.firesoftitan.play.titanbox.libs.tools.*;
@@ -14,13 +13,8 @@ import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSuppo
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.WildStackerSupport;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -29,7 +23,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public final class TitanMachines extends JavaPlugin {
 
@@ -54,7 +47,7 @@ public final class TitanMachines extends JavaPlugin {
         tools = new Tools(this, new SaveRunnable(), -1);
         nbtTool = tools.getNBTTool();
         locationTool = tools.getLocationTool();
-        itemStackTool = tools.getItemStackTool();
+        itemStackTool = tools.getItemStackTool(); //memory problem here <-----------
         messageTool = tools.getMessageTool();
         hologramTool = tools.getHologramTool();
         formattingTool = tools.getFormattingTool();
@@ -89,15 +82,15 @@ public final class TitanMachines extends JavaPlugin {
 
         }
 
-        new LumberjackRunnable().runTaskTimer(this, 20, 20);
-        new BlockBreakerRunnable().runTaskTimer(this, 20, 20);
-        new HopperRunnable().runTaskTimer(this, 20, 20);
-        new SorterRunnable().runTaskTimer(this, 20, 20);
-        new TrashBarrelRunnable().runTaskTimer(this, 20, 20);
-        new JunctionBoxRunnable().runTaskTimer(this,5, 5);
+        new LumberjackRunnable().runTaskTimer(this, 10, 20); //All Good
+        new BlockBreakerRunnable().runTaskTimer(this, 12, 20); //All Good
+        new HopperRunnable().runTaskTimer(this, 15, 20); // 1TPS of Lag
+        new SorterRunnable().runTaskTimer(this, 13, 20); // 1TPS of Lag, overload warning.
+        new TrashBarrelRunnable().runTaskTimer(this, 17, 20); //All Good
+        new JunctionBoxRunnable().runTaskTimer(this,5, 5); //3TPS of Lag
         new TPSMonitorRunnable().runTaskTimer(this, 20, 20);
-        new PipeLoaderRunnable().runTaskLater(this, 1);
-        new MobKillerRunnable().runTaskTimer(this, 5, 5);
+        new PipeLoaderRunnable().runTaskLater(this, 1); //The problem
+        new MobKillerRunnable().runTaskTimer(this, 5, 5);//All Good
 
 
         Objects.requireNonNull(this.getCommand("titanmachines")).setTabCompleter(new TabCompleteListener());
@@ -131,9 +124,9 @@ public final class TitanMachines extends JavaPlugin {
                     if (name.equalsIgnoreCase("tps"))
                     {
                         messageTool.sendMessagePlayer((Player) sender, ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "-------------------------------");
-                        messageTool.sendMessagePlayer((Player) sender, ChatColor.AQUA + "Current TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getCurrentTick());
-                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GREEN + "Average TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getAverageMinute());
-                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GOLD + "Minimum TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getMinimumTick());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.AQUA + "Current TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getCurrentTPS());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GREEN + "Average TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getAverageTPS());
+                        messageTool.sendMessagePlayer((Player) sender, ChatColor.GOLD + "Minimum TPS: " + ChatColor.WHITE + TPSMonitorRunnable.instance.getMinimumTPS());
                         messageTool.sendMessagePlayer((Player) sender, ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "-------------------------------");
                         return true;
                     }

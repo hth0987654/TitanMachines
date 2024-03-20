@@ -1,21 +1,20 @@
 package com.firesoftitan.play.titanbox.titanmachines.support;
 
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
-import io.github.thebusybiscuit.sensibletoolbox.api.SensibleToolbox;
-import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBItem;
-import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
+import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import io.github.thebusybiscuit.slimefun4.implementation.setup.SlimefunItemSetup;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SlimefunSupport extends PluginSupport{
     public static SlimefunSupport instance;
@@ -39,6 +38,7 @@ public class SlimefunSupport extends PluginSupport{
         }
         return false;
     }
+
 
     public Set<Integer> getInventorySlots(Location location)
     {
@@ -70,7 +70,9 @@ public class SlimefunSupport extends PluginSupport{
     {
         if (this.isInstalled()) {
             BlockMenu menu = BlockStorage.getInventory(location);
-            return menu.getItemInSlot(slot);
+            ItemStack itemInSlot = menu.getItemInSlot(slot);
+            if (itemInSlot != null && itemInSlot.getType() == Material.BARRIER) return null;
+            return itemInSlot;
         }
         return null;
     }

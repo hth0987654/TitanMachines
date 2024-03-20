@@ -8,6 +8,7 @@ import com.firesoftitan.play.titanbox.titanmachines.enums.PipeChestFilterTypeEnu
 import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
+import com.firesoftitan.play.titanbox.titanmachines.runnables.SecondaryPipeRunnable;
 import com.firesoftitan.play.titanbox.titanmachines.support.SensibleToolboxSupport;
 import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Bukkit;
@@ -295,6 +296,7 @@ public class AdvancedPipeGUI {
         SelectorGUI s = select.get(player.getUniqueId());
         if (button == 1 && (s == null || s.getGetter() != slot))
         {
+            clearPipe(group);
             ItemStack itemStack = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilter(connection, group, slot);
             PipeChestFilterTypeEnum chestSettingsType = PipesManager.getInstant(PipeTypeEnum.COPPER).getChestSettingsFilterType(connection, group, slot);
             PipeChestFilterTypeEnum nextSetting = PipeChestFilterTypeEnum.getPipeChestType(chestSettingsType.getValue() + 1);
@@ -313,6 +315,7 @@ public class AdvancedPipeGUI {
         }
         else {
             if (button == 11 || button == 1) {
+                clearPipe(group);
                 AdvancedPipeGUI advancedPipeGUI = new AdvancedPipeGUI(player, location, connection);
                 if (s == null) {
                     s = new SelectorGUI(location, connection, group);
@@ -326,5 +329,9 @@ public class AdvancedPipeGUI {
                 advancedPipeGUI.open();
             }
         }
+    }
+    private static void clearPipe(UUID group)
+    {
+        SecondaryPipeRunnable.getSecondaryPipeRunnable(group).clearPipe();
     }
 }

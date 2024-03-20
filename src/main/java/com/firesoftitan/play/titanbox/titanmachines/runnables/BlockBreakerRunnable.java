@@ -23,11 +23,11 @@ public class BlockBreakerRunnable  extends BukkitRunnable {
     @Override
     public void run() {
         BlockBreakerManager manager = BlockBreakerManager.instance;
-        if (quList.size() == 0) quList = manager.getKeys();
+        if (quList.isEmpty()) quList = manager.getKeys();
         List<String> runningKeys = new ArrayList<String>();
         for(int i = 0;i<10; i++)
         {
-            if (quList.size() > 0) {
+            if (!quList.isEmpty()) {
                 runningKeys.add(quList.get(0));
                 quList.remove(0);
             }

@@ -1,13 +1,11 @@
 package com.firesoftitan.play.titanbox.titanmachines.listeners;
 
-import com.firesoftitan.play.titanbox.libs.TitanBoxLibs;
 import com.firesoftitan.play.titanbox.libs.blocks.TitanBlock;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockEvent;
 import com.firesoftitan.play.titanbox.libs.events.TitanBlockInteractEvent;
 import com.firesoftitan.play.titanbox.libs.listeners.TitanBlockListener;
 import com.firesoftitan.play.titanbox.libs.managers.HologramManager;
 import com.firesoftitan.play.titanbox.libs.tools.LibsProtectionTool;
-import com.firesoftitan.play.titanbox.libs.tools.Tools;
 import com.firesoftitan.play.titanbox.titanmachines.TitanMachines;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.JunctionBoxBlock;
 import com.firesoftitan.play.titanbox.titanmachines.blocks.LumberjackBlock;
@@ -17,7 +15,7 @@ import com.firesoftitan.play.titanbox.titanmachines.enums.PipeTypeEnum;
 import com.firesoftitan.play.titanbox.titanmachines.guis.JunctionBoxGUI;
 import com.firesoftitan.play.titanbox.titanmachines.guis.PipeConnectionGUI;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
-import org.bukkit.Bukkit;
+import com.firesoftitan.play.titanbox.titanmachines.runnables.SecondaryPipeRunnable;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -71,6 +69,8 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                         || itemStack.getType() == Material.STONE_PICKAXE  || itemStack.getType() == Material.WOODEN_PICKAXE)
                 {
                     UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(location);
+                    SecondaryPipeRunnable pipeRunnable = SecondaryPipeRunnable.getSecondaryPipeRunnable(group);
+                    if (pipeRunnable != null) pipeRunnable.clearPipe();
                     PipesManager.getInstant(PipeTypeEnum.COPPER).remove(location);
                     TitanBlock.breakBlock(titanBlock);
 
@@ -161,6 +161,8 @@ public class TitanMachineBlockListener extends TitanBlockListener {
                     PipesManager.getInstant(PipeTypeEnum.COPPER).checkSurroundings(location);
 
                     UUID group = PipesManager.getInstant(PipeTypeEnum.COPPER).getGroup(location);
+                    SecondaryPipeRunnable secondaryPipeRunnable = SecondaryPipeRunnable.getSecondaryPipeRunnable(group);
+                    if (secondaryPipeRunnable != null) secondaryPipeRunnable.clearPipe();
                     PipesManager.getInstant(PipeTypeEnum.COPPER).reScanLookupGroup(group);
                 }
             }.runTaskLater(TitanMachines.instants, 1);

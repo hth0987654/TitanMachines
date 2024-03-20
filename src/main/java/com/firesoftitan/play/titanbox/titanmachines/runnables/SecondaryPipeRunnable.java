@@ -8,64 +8,117 @@ import com.firesoftitan.play.titanbox.titanmachines.infos.PipeLookUpInfo;
 import com.firesoftitan.play.titanbox.titanmachines.infos.PipeSendingInfo;
 import com.firesoftitan.play.titanbox.titanmachines.managers.ContainerManager;
 import com.firesoftitan.play.titanbox.titanmachines.managers.PipesManager;
-import com.firesoftitan.play.titanbox.titanmachines.support.SlimefunSupport;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class SecondaryPipeRunnable extends BukkitRunnable {
+    private static final HashMap<UUID, SecondaryPipeRunnable> allRunnersPipeID = new HashMap<UUID, SecondaryPipeRunnable>();
+
     private final long tickTime;
-    private final UUID myId;
-    private final List<UUID> tookLong = new ArrayList<UUID>();
-
-    private boolean busy = false;
-    private UUID current;
-    private PipeTypeEnum typeEnum;
-
+    private final UUID runnerID;
+    private final UUID pipeGroupID;
+    private final PipeTypeEnum typeEnum;
+    private static int slowCount = 0;
     private PipeSendingInfo  pipSaves;
-    public SecondaryPipeRunnable(int ticks) {
-        this.myId = UUID.randomUUID();
+    private boolean running = true;
+    private boolean power = true;
+    private long selftimerRunner;
+    public static SecondaryPipeRunnable getSecondaryPipeRunnable(UUID group)
+    {
+        return allRunnersPipeID.get(group);
+    }
+    public static void stopALL()
+    {
+        for(UUID group: allRunnersPipeID.keySet())
+        {
+            SecondaryPipeRunnable pipeRunnable = allRunnersPipeID.get(group);
+            if (pipeRunnable != null && !pipeRunnable.isCancelled()) pipeRunnable.cancel();
+        }
+        allRunnersPipeID.clear();
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+
+    public boolean isPowered() {
+        return power;
+    }
+
+    public void setPower(boolean power) {
+        this.power = power;
+    }
+
+
+    public static int getSize()
+    {
+        return allRunnersPipeID.size();
+    }
+    public static int getSlowCount()
+    {
+        return slowCount;
+    }
+    public SecondaryPipeRunnable(int ticks, PipeTypeEnum pipeTypeEnum, UUID group) {
+        this.runnerID = UUID.randomUUID();
         this.tickTime = ticks;
         this.runTaskTimer(TitanMachines.instants, this.tickTime, this.tickTime);
-    }
-
-    public boolean isBusy() {
-        return busy;
-    }
-    public void start(PipeTypeEnum pipeTypeEnum, UUID group)
-    {
-        busy = true;
         typeEnum = pipeTypeEnum;
-        current = group;
+        pipeGroupID = group;
+        allRunnersPipeID.put(group, this);
+    }
+    public void clearPipe()
+    {
+        pipSaves = null;
+        this.running = false;
+        if (this.power) {
+            this.power = false;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    power = true;
+                }
+            }.runTaskLater(TitanMachines.instants, 20);
+        }
     }
     @Override
     public void run() {
-        if (!busy || current == null || typeEnum == null) return;
-        if (!TitanMachines.pipedEnabled) return;
-
-
+        if (!this.power || pipeGroupID == null || typeEnum == null || !TitanMachines.pipedEnabled) return;
+        long KickOutTime = 40L;
+        if (PipeRunnable.instance.isLowTPSMode() == 1) {
+            KickOutTime = 20L;
+        }
+        if (PipeRunnable.instance.isLowTPSMode() == 2)
+        {
+            KickOutTime = 10L;
+        }
+        if (PipeRunnable.instance.isLowTPSMode() == 3)
+        {
+            return;
+        }
+        this.running = true;
         PipesManager copperPipes = PipesManager.getInstant(typeEnum);
         long selftimer = System.currentTimeMillis();
-        PipeLookUpInfo lookUp = copperPipes.getLookUp(current);
+        PipeLookUpInfo lookUp = copperPipes.getLookUp(pipeGroupID);
         if (lookUp != null) {
             if (pipSaves == null)
             {
-                pipSaves = new PipeSendingInfo(current, lookUp);
-                List<Location> OutChestsInGroup = copperPipes.getOutChestsInGroup(current);
+                selftimerRunner = System.currentTimeMillis();
+                pipSaves = new PipeSendingInfo(pipeGroupID, lookUp);
+                List<Location> OutChestsInGroup = copperPipes.getOutChestsInGroup(pipeGroupID);
                 pipSaves.outBound.setLocations(OutChestsInGroup);
             }
 
             for (int j = pipSaves.outBound.getCurrentLocationIndex(); j < pipSaves.outBound.getLocations().size(); j++) {
                 Location outLocation = pipSaves.outBound.getLocations().get(j);
                 pipSaves.outBound.setCurrentLocation(outLocation);
-                pipSaves.outBound.setSlots(ContainerManager.getInventorySlots(current, outLocation));
+                pipSaves.outBound.setSlots(ContainerManager.getInventorySlots(pipeGroupID, outLocation));
                 long selftimer2 = System.currentTimeMillis() - selftimer;
-                if (selftimer2 > this.tickTime / 3L) return;
 
+                if (selftimer2 > KickOutTime || !this.power  || !TitanMachines.pipedEnabled) return;
                 for(int i = pipSaves.outBound.getIndex(); i < pipSaves.outBound.getSlots().size(); i++)
                 {
 
@@ -74,26 +127,26 @@ public class SecondaryPipeRunnable extends BukkitRunnable {
                     pipSaves.outBound.setCurrentSlot(slot);
 
                     selftimer2 = System.currentTimeMillis() - selftimer;
-                    if (selftimer2 > this.tickTime / 3L) return;
+                    if (selftimer2 > KickOutTime || !this.power  || !TitanMachines.pipedEnabled) return;
                     ItemStack item = ContainerManager.getInventorySlot(pipSaves.outBound);
                     pipSaves.outBound.setItemStack(item);
 
 
-                    PipeChestFilterTypeEnum OutChestSettingsFilterType = copperPipes.getChestSettingsFilterType(outLocation, current, slot);
+                    PipeChestFilterTypeEnum OutChestSettingsFilterType = copperPipes.getChestSettingsFilterType(outLocation, pipeGroupID, slot);
                     if (OutChestSettingsFilterType == PipeChestFilterTypeEnum.ALL) {
                         if (!TitanMachines.itemStackTool.isEmpty(item)) {
                             CheckAllFilterTypes(pipSaves);
                         }
                     } else if (OutChestSettingsFilterType == PipeChestFilterTypeEnum.MATERIAL_ONLY) {
                         if (!TitanMachines.itemStackTool.isEmpty(item)) {
-                            ItemStack chestSettingsFilter = copperPipes.getChestSettingsFilter(outLocation, current, slot);
+                            ItemStack chestSettingsFilter = copperPipes.getChestSettingsFilter(outLocation, pipeGroupID, slot);
                             if (chestSettingsFilter.getType() == item.getType()) {
                                 CheckAllFilterTypes(pipSaves);
                             }
                         }
                     }else if (OutChestSettingsFilterType == PipeChestFilterTypeEnum.TOTAL_MATCH) {
                         if (!TitanMachines.itemStackTool.isEmpty(item)) {
-                            ItemStack chestSettingsFilter = copperPipes.getChestSettingsFilter(outLocation, current, slot);
+                            ItemStack chestSettingsFilter = copperPipes.getChestSettingsFilter(outLocation, pipeGroupID, slot);
                             if (TitanMachines.itemStackTool.isItemEqual(chestSettingsFilter, item)) {
                                 CheckAllFilterTypes(pipSaves);
                             }
@@ -105,44 +158,33 @@ public class SecondaryPipeRunnable extends BukkitRunnable {
             }
 
         }
-        else
-        {
-            tookLong.remove(current);
-        }
         selftimer = System.currentTimeMillis() - selftimer;
         if (selftimer > this.tickTime / 3L)
         {
 
         }
-        PipeRunnable.instance.setLastTimeRan(current);
-        PipeRunnable.instance.setTimeNow(current);
+        PipeRunnable.instance.setRunningTimeNow(pipeGroupID, System.currentTimeMillis() - selftimerRunner);
+        PipeRunnable.instance.setLastTimeRan(pipeGroupID);
+        PipeRunnable.instance.setTimeNow(pipeGroupID);
+
+        this.running = false;
         pipSaves = null;
-        if (selftimer > this.tickTime) TitanMachines.messageTool.sendMessageSystem("Took to long, Time: " + selftimer + " ms");
-        current = null;
-        typeEnum = null;
-        busy = false;
+        //if (selftimer > this.tickTime) TitanMachines.messageTool.sendMessageSystem("Took to long, Time: " + selftimer + " ms");
+        //current = null;
+        //typeEnum = null;
+        //busy = false;
 
     }
-    public void addPipeGroup(UUID uuid)
+    public String getProgress()
     {
-        if (!tookLong.contains(uuid)) tookLong.add(uuid);
-    }
-    public boolean hasPipeGroup(UUID uuid)
-    {
-        return tookLong.contains(uuid);
-    }
-    public List<UUID> myPipesGroups()
-    {
-        return new ArrayList<UUID>(tookLong);
-    }
-    public UUID getMyId() {
-        return myId;
+        if (pipSaves == null) return "waiting...";
+        return pipSaves.outBound.getCurrentLocationIndex() + "/" + pipSaves.outBound.getLocations().size();
     }
 
-    public int getQSize()
-    {
-        return tookLong.size();
+    public UUID getRunnerID() {
+        return runnerID;
     }
+
     private void CheckAllFilterTypes(PipeSendingInfo sendingInfo) {
         PipeChestFilterTypeEnum match = PipeChestFilterTypeEnum.TOTAL_MATCH;
         checkAndMove(sendingInfo, match);

@@ -6,12 +6,10 @@ import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBBlock;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBItem;
 import io.github.thebusybiscuit.sensibletoolbox.api.items.BaseSTBMachine;
 import io.github.thebusybiscuit.sensibletoolbox.blocks.machines.BigStorageUnit;
-import io.github.thebusybiscuit.sensibletoolbox.blocks.machines.HyperStorageUnit;
 import io.github.thebusybiscuit.sensibletoolbox.core.storage.LocationManager;
 import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,6 +105,7 @@ public class SensibleToolboxSupport extends PluginSupport{
     }
 
     public ItemStack addStorage(Location location, ItemStack itemStack) {
+        if (TitanMachines.itemStackTool.isEmpty(itemStack)) return null;
         if (this.isSupported(location)) {
             BaseSTBMachine BSU = this.getSTBMachine(location);
             int inputSlot = BSU.getInputSlots()[0];
